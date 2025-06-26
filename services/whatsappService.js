@@ -2,52 +2,26 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
 
-let vendedorId = 'desconhecido';
+const USER_ID = process.env.USER_ID || 'default'; // Nome da instância
+let vendedorId = USER_ID; // Esse valor pode ser sobrescrito após login
 
 const client = new Client({
   authStrategy: new LocalAuth({
-    clientId: 'vendedor-001' // você pode personalizar este ID por instância
+    dataPath: `.wwebjs_auth/session-${USER_ID}` // Sessões independentes por usuário
   }),
   puppeteer: {
     headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
+    args: ['--no-sandbox']
   }
 });
 
-// Mostra o QR Code no terminal
-client.on('qr', (qr) => {
-  console.clear();
-  console.log('Escaneie o QR Code abaixo para conectar o WhatsApp:');
-  qrcode.generate(qr, { small: true });
-});
-
-// Define o vendedorId quando a sessão está pronta
 client.on('ready', () => {
-  vendedorId = client.info.wid.user;
-  console.log(`Cliente do WhatsApp está pronto! Vendedor ID: ${vendedorId}`);
+  if (client.info?.wid?.user) {
+    vendedorId = client.info.wid.user;
+  }
+  console.log(`✅ WhatsApp conectado - Vendedor ID: ${vendedorId}`);
 });
 
-// Captura mensagens enviadas e recebidas
-client.on('message_create', async msg => {
-  const direction = msg.fromMe ? 'sent' : 'received';
-  await handleMessage(msg, direction);
-});
-
-// Informa quando a sessão for desconectada
-client.on('disconnected', (reason) => {
-  console.log(`Desconectado do WhatsApp: ${reason}`);
-});
-
-// Lógica de envio para API
 async function handleMessage(message, direction) {
   const contato = message.from;
   const contatoInfo = await message.getContact();
@@ -57,7 +31,7 @@ async function handleMessage(message, direction) {
 
   const payload = {
     vendedor_id: vendedorId,
-    contato: contato,
+    contato,
     nome_contato: nomeContato,
     nome_grupo: nomeGrupo,
     mensagem: message.body,
@@ -73,8 +47,23 @@ async function handleMessage(message, direction) {
     });
     console.log(`[${direction}] ${nomeContato || contato}: ${message.body}`);
   } catch (err) {
-    console.error('Erro ao enviar mensagem para a API:', err.message);
+    console.error('❌ Erro ao enviar mensagem para a API:', err);
   }
 }
+
+client.on('message_create', async msg => {
+  const direction = msg.fromMe ? 'sent' : 'received';
+  await handleMessage(msg, direction);
+});
+
+client.on('qr', (qr) => {
+  console.clear();
+  console.log(`📲 Escaneie o QR Code para conectar (${USER_ID}):`);
+  qrcode.generate(qr, { small: true });
+});
+
+client.on('disconnected', reason => {
+  console.log(`⚠️ Sessão desconectada (${USER_ID}): ${reason}`);
+});
 
 client.initialize();
