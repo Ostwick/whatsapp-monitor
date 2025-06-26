@@ -19,11 +19,11 @@ client.on('ready', () => {
   if (client.info?.wid?.user) {
     vendedorId = client.info.wid.user;
   }
-  console.log(`✅ WhatsApp conectado - Vendedor ID: ${vendedorId}`);
+  console.log(`WhatsApp conectado - Vendedor ID: ${vendedorId}`);
 });
 
 async function handleMessage(message, direction) {
-  const contato = message.from;
+  const contato = message.fromMe ? message.to : message.from;
   const contatoInfo = await message.getContact();
   const nomeContato = contatoInfo.name || contatoInfo.pushname || contatoInfo.number;
   const isGroup = contato.endsWith('@g.us');
@@ -47,7 +47,7 @@ async function handleMessage(message, direction) {
     });
     console.log(`[${direction}] ${nomeContato || contato}: ${message.body}`);
   } catch (err) {
-    console.error('❌ Erro ao enviar mensagem para a API:', err);
+    console.error('Erro ao enviar mensagem para a API:', err);
   }
 }
 
@@ -58,12 +58,12 @@ client.on('message_create', async msg => {
 
 client.on('qr', (qr) => {
   console.clear();
-  console.log(`📲 Escaneie o QR Code para conectar (${USER_ID}):`);
+  console.log(`Escaneie o QR Code para conectar (${USER_ID}):`);
   qrcode.generate(qr, { small: true });
 });
 
 client.on('disconnected', reason => {
-  console.log(`⚠️ Sessão desconectada (${USER_ID}): ${reason}`);
+  console.log(`Sessão desconectada (${USER_ID}): ${reason}`);
 });
 
 client.initialize();
