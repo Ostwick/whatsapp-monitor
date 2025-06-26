@@ -4,4 +4,4 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 ENV USER_ID=default
-CMD ["npm", "run", "api"]
+CMD ["npm", "run", "start"]
