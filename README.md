@@ -28,7 +28,7 @@ Este projeto é uma aplicação Node.js que utiliza a biblioteca [`whatsapp-web.
 
 ```bash
 # Clone o repositório
-git clone https://github.com/seu-usuario/whatsapp-monitor.git
+git clone https://github.com/Ostwick/whatsapp-monitor.git
 cd whatsapp-monitor
 
 # Instale as dependências
