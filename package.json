@@ -2,7 +2,7 @@
   "name": "whatsapp-monitor",
   "main": "electron/main.js",
   "scripts": {
-  "start": "concurrently \"node backend/api.js\" \"node services/whatsappService.js\""
+  "start": "npx concurrently \"node backend/api.js\" \"node services/whatsappService.js\""
 },
   "dependencies": {
     "concurrently": "^8.2.0",
