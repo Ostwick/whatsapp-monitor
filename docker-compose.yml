@@ -9,6 +9,7 @@ services:
       - USER_ID=filial-ms
     volumes:
       - ./sessions/filial-ms:/app/.wwebjs_auth/session-filial-ms
+    mem_limit: 250m
 
   filial_mt:
     build: .
@@ -19,6 +20,7 @@ services:
       - USER_ID=filial-mt
     volumes:
       - ./sessions/filial-mt:/app/.wwebjs_auth/session-filial-mt
+    mem_limit: 250m
 
   filial_pr:
     build: .
@@ -29,6 +31,7 @@ services:
       - USER_ID=filial-pr
     volumes:
       - ./sessions/filial-pr:/app/.wwebjs_auth/session-filial-pr
+    mem_limit: 250m
 
   filial_go:
     build: .
@@ -94,6 +97,7 @@ services:
       - USER_ID=mg
     volumes:
       - ./sessions/mg:/app/.wwebjs_auth/session-mg
+    mem_limit: 250m
 
   norte:
     build: .
