@@ -1,45 +1,34 @@
-# Etapa 1: imagem base com dependências para Puppeteer/Chromium
 FROM node:18-slim
 
-# Define diretório de trabalho
 WORKDIR /app
 
-# Instala dependências do sistema para Chromium
 RUN apt-get update && apt-get install -y \
-    wget \
-    ca-certificates \
+    chromium \
     fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libgdk-pixbuf2.0-0 \
-    libnspr4 \
-    libnss3 \
+    libgbm1 \
+    libgtk-3-0 \
     libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
-    xdg-utils \
-    libgbm-dev \
-    libgtk-3-0 \
+    libasound2 \
+    libnss3 \
     libxshmfence-dev \
     libgconf-2-4 \
-    libglib2.0-0 \
+    xdg-utils \
+    ca-certificates \
     --no-install-recommends \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Copia os arquivos do projeto
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 COPY . .
 
-# Instala dependências do projeto
-RUN npm install
+RUN npm ci --omit=dev
 
-# Expõe a porta usada pela API
 EXPOSE 3000
 
-# Executa a API + WhatsApp monitor
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]
