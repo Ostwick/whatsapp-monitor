@@ -39,6 +39,7 @@ services:
       - USER_ID=filial-go
     volumes:
       - ./sessions/filial-go:/app/.wwebjs_auth/session-filial-go
+    mem_limit: 250m
 
   vhf_sp:
     build: .
@@ -49,6 +50,7 @@ services:
       - USER_ID=vhf-sp
     volumes:
       - ./sessions/vhf-sp:/app/.wwebjs_auth/session-vhf-sp
+    mem_limit: 250m
 
   vans_sp:
     build: .
@@ -59,6 +61,7 @@ services:
       - USER_ID=vans-sp
     volumes:
       - ./sessions/vans-sp:/app/.wwebjs_auth/session-vans-sp
+    mem_limit: 250m
 
   sudeste:
     build: .
@@ -69,6 +72,7 @@ services:
       - USER_ID=sudeste
     volumes:
       - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste
+    mem_limit: 250m
 
   sul:
     build: .
@@ -79,6 +83,7 @@ services:
       - USER_ID=sul
     volumes:
       - ./sessions/sul:/app/.wwebjs_auth/session-sul
+    mem_limit: 250m
 
   mg:
     build: .
@@ -99,6 +104,7 @@ services:
       - USER_ID=norte
     volumes:
       - ./sessions/norte:/app/.wwebjs_auth/session-norte
+    mem_limit: 250m
 
   nordeste:
     build: .
@@ -109,6 +115,7 @@ services:
       - USER_ID=nordeste
     volumes:
       - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste
+    mem_limit: 250m
 
   projetos:
     build: .
@@ -119,6 +126,7 @@ services:
       - USER_ID=projetos
     volumes:
       - ./sessions/projetos:/app/.wwebjs_auth/session-projetos
+    mem_limit: 250m
 
   comex1:
     build: .
@@ -129,6 +137,7 @@ services:
       - USER_ID=comex1
     volumes:
       - ./sessions/comex1:/app/.wwebjs_auth/session-comex1
+    mem_limit: 250m
 
   comex2:
     build: .
@@ -139,6 +148,7 @@ services:
       - USER_ID=comex2
     volumes:
       - ./sessions/comex2:/app/.wwebjs_auth/session-comex2
+    mem_limit: 250m
 
   comex3:
     build: .
@@ -149,3 +159,4 @@ services:
       - USER_ID=comex3
     volumes:
       - ./sessions/comex3:/app/.wwebjs_auth/session-comex3
+    mem_limit: 250m
