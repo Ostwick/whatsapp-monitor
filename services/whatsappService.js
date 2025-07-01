@@ -10,19 +10,9 @@ const client = new Client({
     dataPath: `.wwebjs_auth/session-${USER_ID}` // Sessões independentes por usuário
   }),
   puppeteer: {
-  headless: 'new',
-  args: [
-    '--no-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-setuid-sandbox',
-    '--disable-accelerated-2d-canvas',
-    '--disable-gpu',
-    '--no-first-run',
-    '--no-zygote',
-    '--single-process',
-    '--disable-dev-tools',
-    '--mute-audio'
-    ]
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+  headless: true,
+  args: ['--no-sandbox', '--disable-dev-shm-usage']
   }
 });
 
