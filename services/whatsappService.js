@@ -4,6 +4,15 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
 
+const DEFAULT_USER_ID = 'default';
+const DEFAULT_API_ENDPOINT = 'http://api:3000/api/mensagens';
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+const BATCH_SIZE = 10;
+const BATCH_INTERVAL_MS = 5000;
+const MEMORY_LIMIT_MB = 280;
+const MEMORY_CHECK_INTERVAL_MS = 30000;
+
 class WhatsAppService {
   constructor() {
     this.USER_ID = process.env.USER_ID || 'default';
