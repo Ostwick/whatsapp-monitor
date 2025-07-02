@@ -71,7 +71,7 @@ cleanup() {\n\
     echo "Cleaning up Chrome processes..."\n\
     pkill -f chromium || true\n\
     pkill -f chrome || true\n\
-    rm -rf /tmp/chrome-* || true\n\
+    find /tmp -name "chrome-*" -type d -exec rm -rf {} + 2>/dev/null || true\n\
     exit 0\n\
 }\n\
 \n\
@@ -82,18 +82,21 @@ trap cleanup SIGTERM SIGINT\n\
 echo "Initial cleanup..."\n\
 pkill -f chromium || true\n\
 pkill -f chrome || true\n\
-rm -rf /tmp/chrome-* || true\n\
-rm -rf /app/.wwebjs_auth/session-*/SingletonLock || true\n\
-rm -rf /app/.wwebjs_auth/session-*/Default || true\n\
 \n\
-# Start virtual display (if needed)\n\
-if [ "$DISPLAY" = ":99" ]; then\n\
-    Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &\n\
-    export DISPLAY=:99\n\
-fi\n\
+# Clean Chrome temp directories (only ones we can access)\n\
+find /tmp -name "chrome-*" -type d -user appuser -exec rm -rf {} + 2>/dev/null || true\n\
+\n\
+# Clean session locks (only if we have permission)\n\
+find /app/.wwebjs_auth -name "SingletonLock" -exec rm -f {} + 2>/dev/null || true\n\
+find /app/.wwebjs_auth -name "SingletonSocket" -exec rm -f {} + 2>/dev/null || true\n\
+find /app/.wwebjs_auth -name "SingletonCookie" -exec rm -f {} + 2>/dev/null || true\n\
+find /app/.wwebjs_auth -name "Default" -type d -exec rm -rf {} + 2>/dev/null || true\n\
+\n\
+# Create temp directory for this instance\n\
+mkdir -p /tmp/chrome-${USER_ID:-default} || true\n\
 \n\
 # Start the application\n\
-echo "Starting WhatsApp service..."\n\
+echo "Starting WhatsApp service for ${USER_ID:-default}..."\n\
 exec node services/whatsappService.js "$@"\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 
