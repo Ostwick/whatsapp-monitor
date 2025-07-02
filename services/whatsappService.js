@@ -3,7 +3,7 @@ const { setTimeout } = require('timers/promises');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
-const execPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+
 const DEFAULT_USER_ID = 'default';
 const DEFAULT_API_ENDPOINT = 'http://api:3000/api/mensagens';
 const MAX_RETRIES = 3;
@@ -39,9 +39,6 @@ class WhatsAppService {
     this.startBatchProcessor();
     this.startMemoryMonitor();
     this.cleanSessionLocks();
-  }
-  if (!fs.existsSync(execPath)) {
-    console.error(`[${this.USER_ID}] ERRO: Chromium não encontrado em ${execPath}`);
   }
   initializeClient() {
   console.log(`[${this.USER_ID}] Criando client WhatsApp...`);
