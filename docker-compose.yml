@@ -1,203 +1,196 @@
 version: '3.9'
 
-x-defaults: &defaults
-  build: .
-  mem_limit: 350m
+x-whatsapp-defaults: &whatsapp-defaults
+  build:
+    context: ./whatsapp-client
+    dockerfile: Dockerfile
+  mem_limit: 320m
   restart: unless-stopped
   environment:
     - NODE_ENV=production
-    - NODE_OPTIONS=--max-old-space-size=300
+    - NODE_OPTIONS=--max-old-space-size=280
     - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     - DISABLE_GPU=1
+    - API_ENDPOINT=http://api:3000/api/mensagens
   healthcheck:
-    test: ["CMD", "node", "-e", "process.exit(process.memoryUsage().heapUsed > 300000000 ? 1 : 0)"]
+    test: ["CMD", "node", "-e", "process.exit(process.memoryUsage().heapUsed > 280000000 ? 1 : 0)"]
     interval: 30s
     timeout: 5s
     retries: 3
 
 services:
   filial_ms:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_filial_ms
-    ports:
-      - "3101:3000"
+    ports: ["3101:3000"]
     environment:
       - USER_ID=filial-ms
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-ms:/app/.wwebjs_auth/session-filial-ms
 
   filial_mt:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_filial_mt
-    ports:
-      - "3102:3000"
+    ports: ["3102:3000"]
     environment:
       - USER_ID=filial-mt
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-mt:/app/.wwebjs_auth/session-filial-mt
 
   filial_pr:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_filial_pr
     ports:
       - "3103:3000"
     environment:
       - USER_ID=filial-pr
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-pr:/app/.wwebjs_auth/session-filial-pr
 
   filial_go:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_filial_go
     ports:
       - "3104:3000"
     environment:
       - USER_ID=filial-go
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-go:/app/.wwebjs_auth/session-filial-go
 
   vhf_sp:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_vhf_sp
     ports:
       - "3105:3000"
     environment:
       - USER_ID=vhf-sp
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/vhf-sp:/app/.wwebjs_auth/session-vhf-sp
 
   vans_sp:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_vans_sp
     ports:
       - "3106:3000"
     environment:
       - USER_ID=vans-sp
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/vans-sp:/app/.wwebjs_auth/session-vans-sp
 
   sudeste:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_sudeste
     ports:
       - "3107:3000"
     environment:
       - USER_ID=sudeste
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste
 
   sul:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_sul
     ports:
       - "3108:3000"
     environment:
       - USER_ID=sul
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/sul:/app/.wwebjs_auth/session-sul
 
   mg:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_mg
     ports:
       - "3109:3000"
     environment:
       - USER_ID=mg
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/mg:/app/.wwebjs_auth/session-mg
 
   norte:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_norte
     ports:
       - "3110:3000"
     environment:
       - USER_ID=norte
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/norte:/app/.wwebjs_auth/session-norte
 
   nordeste:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_nordeste
     ports:
       - "3111:3000"
     environment:
       - USER_ID=nordeste
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste
 
   projetos:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_projetos
     ports:
       - "3112:3000"
     environment:
       - USER_ID=projetos
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/projetos:/app/.wwebjs_auth/session-projetos
 
   comex1:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_comex1
     ports:
       - "3113:3000"
     environment:
       - USER_ID=comex1
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/comex1:/app/.wwebjs_auth/session-comex1
 
   comex2:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_comex2
     ports:
       - "3114:3000"
     environment:
       - USER_ID=comex2
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/comex2:/app/.wwebjs_auth/session-comex2
 
   comex3:
-    <<: *defaults
+    <<: *whatsapp-defaults
     container_name: app_comex3
     ports:
       - "3115:3000"
     environment:
       - USER_ID=comex3
-      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/comex3:/app/.wwebjs_auth/session-comex3
 
-  # Add this API service
+  # API Service
   api:
-    image: node:18-slim
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
     container_name: whatsapp_api
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NODE_OPTIONS=--max-old-space-size=512
+      - NODE_OPTIONS=--max-old-space-size=384
+      - PGUSER=${DB_USER:-postgres}
+      - PGHOST=postgres
+      - PGDATABASE=${DB_NAME:-whatsapp}
+      - PGPASSWORD=${DB_PASSWORD:-postgres}
+      - PGPORT=5432
     volumes:
-      - ./api:/app
-    working_dir: /app
-    command: ["node", "api.js"]
+      - ./backend:/app
     mem_limit: 512m
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
+  # PostgreSQL Service
   postgres:
     image: postgres:15-alpine
     container_name: whatsapp_db
@@ -207,9 +200,10 @@ services:
       POSTGRES_DB: ${DB_NAME:-whatsapp}
     volumes:
       - pgdata:/var/lib/postgresql/data
-    mem_limit: 1g
+      - ./backend/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+    mem_limit: 768m
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
