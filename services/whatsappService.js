@@ -270,4 +270,6 @@ process.on('SIGINT', () => {
   process.exit();
 });
 
+setInterval(() => {}, 1 << 30); // loop infinito para manter vivo
+
 module.exports = instance;
