@@ -25,6 +25,7 @@ x-whatsapp-defaults: &whatsapp-defaults
     context: .
     dockerfile: Dockerfile.whatsapp
   mem_limit: 320m
+  restart: "no"
   healthcheck:
     test: ["CMD", "node", "-e", "process.exit(process.memoryUsage().heapUsed > 280000000 ? 1 : 0)"]
     interval: 30s
