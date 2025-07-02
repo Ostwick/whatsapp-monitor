@@ -1,7 +1,11 @@
 FROM node:18-slim
+
+# Create app user for security
+RUN groupadd -r appuser && useradd -r -g appuser -s /bin/false appuser
+
 WORKDIR /app
 
-# Instala libs do Chromium...
+# Install Chromium and required dependencies
 RUN apt-get update && apt-get install -y \
     chromium \
     wget \
@@ -26,14 +30,79 @@ RUN apt-get update && apt-get install -y \
     libxshmfence-dev \
     libgconf-2-4 \
     libglib2.0-0 \
+    procps \
+    psmisc \
+    dbus-x11 \
+    xvfb \
     --no-install-recommends && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Create symbolic link for chromium
 RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
-COPY package*.json ./
-RUN npm install
-COPY . .
+# Create necessary directories with proper permissions
+RUN mkdir -p /tmp/chrome /var/tmp /app/.wwebjs_auth && \
+    chmod 1777 /tmp && \
+    chmod 1777 /var/tmp && \
+    chmod 755 /tmp/chrome && \
+    chown -R appuser:appuser /app
 
-CMD ["node", "services/whatsappService.js"]
+# Copy package files and install dependencies
+COPY --chown=appuser:appuser package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy application code
+COPY --chown=appuser:appuser . .
+
+# Set environment variables for Chrome
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    DISPLAY=:99 \
+    CHROME_DEVEL_SANDBOX=/usr/lib/chromium/chrome-sandbox \
+    PUPPETEER_DISABLE_PROFILE_LOCK=true
+
+# Create startup script to handle cleanup and initialization
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# Function to cleanup on exit\n\
+cleanup() {\n\
+    echo "Cleaning up Chrome processes..."\n\
+    pkill -f chromium || true\n\
+    pkill -f chrome || true\n\
+    rm -rf /tmp/chrome-* || true\n\
+    exit 0\n\
+}\n\
+\n\
+# Set trap for cleanup\n\
+trap cleanup SIGTERM SIGINT\n\
+\n\
+# Clean up any existing Chrome processes and locks\n\
+echo "Initial cleanup..."\n\
+pkill -f chromium || true\n\
+pkill -f chrome || true\n\
+rm -rf /tmp/chrome-* || true\n\
+rm -rf /app/.wwebjs_auth/session-*/SingletonLock || true\n\
+rm -rf /app/.wwebjs_auth/session-*/Default || true\n\
+\n\
+# Start virtual display (if needed)\n\
+if [ "$DISPLAY" = ":99" ]; then\n\
+    Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &\n\
+    export DISPLAY=:99\n\
+fi\n\
+\n\
+# Start the application\n\
+echo "Starting WhatsApp service..."\n\
+exec node services/whatsappService.js "$@"\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
+# Switch to non-root user
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=60s --timeout=10s --start-period=60s --retries=3 \
+    CMD node -e "process.exit(process.memoryUsage().heapUsed > 280000000 ? 1 : 0)" || exit 1
+
+# Use startup script
+CMD ["/app/start.sh"]
