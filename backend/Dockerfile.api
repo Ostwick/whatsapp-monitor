@@ -1,17 +1,25 @@
-FROM node:18.17.1-alpine
+# Use official Node.js Alpine image for smaller size
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Install only production dependencies
-COPY package*.json ./
-RUN npm ci --omit=dev --ignore-scripts
+# Install dependencies first for better caching
+COPY package.json package-lock.json* ./  # Note the * for optional lockfile
 
-# Copy app files
+# If package-lock.json doesn't exist, create it with npm install
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+
+# Copy the rest of the application files
 COPY . .
 
-# Run as non-root user
-RUN addgroup -S app && adduser -S app -G app
-USER app
+# Create non-root user and set permissions
+RUN adduser -D appuser && \
+    chown -R appuser:appuser /app
+USER appuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s \
+    CMD node -e "process.exit(process.memoryUsage().heapUsed > 350000000 ? 1 : 0)"
 
 EXPOSE 3000
 
