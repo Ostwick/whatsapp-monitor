@@ -108,6 +108,7 @@ class WhatsAppService {
           `--user-data-dir=/tmp/chrome-${this.USER_ID}`,
           '--disable-extensions',
           '--disable-crash-reporter',
+          '--crashpad-handler-database=/tmp/crashpad',
           '--disable-setuid-sandbox',
           '--disable-background-networking',
           '--crash-dumps-dir=/tmp',
