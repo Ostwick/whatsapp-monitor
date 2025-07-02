@@ -1,7 +1,7 @@
 version: '3.9'
 
 # Shared environment variables
-x-env: &env-vars
+x-env: &default-environment
   L: ${L:-C.UTF-8}
   TZ: ${TZ:-America/Sao_Paulo}
   PGUSER: ${PGUSER:-bi_script}
@@ -18,7 +18,7 @@ x-whatsapp-defaults: &whatsapp-defaults
   mem_limit: 320m
   restart: unless-stopped
   environment:
-    <<: *env-vars
+    <<: *default-environment
     - NODE_ENV=production
     - NODE_OPTIONS=--max-old-space-size=280
     - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
@@ -40,22 +40,17 @@ x-whatsapp-defaults: &whatsapp-defaults
         size: 100000000  # 100MB for Chrome temp files
 
 # API service defaults
-x-api-defaults: &api-defaults
+x-api-service: &api-service
   build:
     context: ./backend
     dockerfile: Dockerfile.api
   mem_limit: 512m
   restart: unless-stopped
   environment:
-    <<: *env-vars
-    - NODE_ENV=production
-    - NODE_OPTIONS=--max-old-space-size=384
-    - PGUSER=${DB_USER:-postgres}
-    - PGHOST=postgres
-    - PGDATABASE=${DB_NAME:-whatsapp}
-    - PGPASSWORD=${DB_PASSWORD:-postgres}
-    - PGPORT=5432
-    - MAX_BATCH_SIZE=25
+    <<: *default-environment
+    NODE_ENV: "production"
+    NODE_OPTIONS: "--max-old-space-size=384"
+    MAX_BATCH_SIZE: "25"
   depends_on:
     postgres:
       condition: service_healthy
@@ -87,7 +82,7 @@ services:
 
   # API Service
   api:
-    <<: *api-defaults
+    <<: *api-service
     container_name: whatsapp_api
     ports: ["3000:3000"]
 
