@@ -63,12 +63,12 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 RUN echo '#!/bin/bash\n\
 set -e\n\
 \n\
-# Function to cleanup on exit\n\
 cleanup() {\n\
     echo "Cleaning up Chrome processes..."\n\
     pkill -f chromium || true\n\
     pkill -f chrome || true\n\
     find /tmp -name "chrome-*" -type d -exec rm -rf {} + 2>/dev/null || true\n\
+    rm -rf /tmp/crashpad 2>/dev/null || true
     exit 0\n\
 }\n\
 \n\
