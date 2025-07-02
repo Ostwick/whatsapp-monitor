@@ -3,7 +3,7 @@ const { setTimeout } = require('timers/promises');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
-
+const execPath = process.env.PUPPETEER_EXECUTABLE_PATH;
 const DEFAULT_USER_ID = 'default';
 const DEFAULT_API_ENDPOINT = 'http://api:3000/api/mensagens';
 const MAX_RETRIES = 3;
@@ -34,20 +34,23 @@ class WhatsAppService {
     this.messageCount = 0;
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
 
-    this.initializeClient();
+    this.initialize();
     this.setupEventHandlers();
     this.startBatchProcessor();
     this.startMemoryMonitor();
     this.cleanSessionLocks();
   }
-
+  if (!fs.existsSync(execPath)) {
+    console.error(`[${this.USER_ID}] ERRO: Chromium não encontrado em ${execPath}`);
+  }
   initializeClient() {
-    this.client = new Client({
-      authStrategy: new LocalAuth({
-        clientId: this.USER_ID,
-        dataPath: this.sessionPath,
-        dataPathCache: false
-      }),
+  console.log(`[${this.USER_ID}] Criando client WhatsApp...`);
+  this.client = new Client({
+    authStrategy: new LocalAuth({
+      clientId: this.USER_ID,
+      dataPath: this.sessionPath,
+      dataPathCache: false
+    }),
       puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: 'new',
@@ -65,6 +68,7 @@ class WhatsAppService {
       takeoverOnConflict: true,
       restartOnAuthFail: true
     });
+    console.log(`[${this.USER_ID}] Cliente criado, chamando .initialize()...`);
   }
 
   cleanSessionLocks() {
@@ -118,6 +122,22 @@ class WhatsAppService {
       } catch (err) {
         console.error('Message processing error:', err);
       }
+      
+    });
+    this.client.on('change_state', state => {
+      console.log(`[${this.USER_ID}] State changed: ${state}`);
+    });
+    
+    this.client.on('loading_screen', (percent, message) => {
+      console.log(`[${this.USER_ID}] Loading... ${percent}% - ${message}`);
+    });
+    
+    this.client.on('error', error => {
+      console.error(`[${this.USER_ID}] WhatsApp Error:`, error);
+    });
+    
+    this.client.on('auth_failure', msg => {
+      console.error(`[${this.USER_ID}] Auth Failure:`, msg);
     });
   }
 
