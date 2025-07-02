@@ -78,6 +78,22 @@ class WhatsAppService {
     this.isProcessingQueue = false;
   }
 
+  async processBatch() {
+    if (this.messageQueue.length === 0) return;
+    
+    const batchSize = 10;
+    const batch = this.messageQueue.splice(0, batchSize);
+    try {
+      await fetch(`${API_ENDPOINT}/batch`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(batch.map(item => this.createPayload(item)))
+      });
+    } catch (err) {
+      this.messageQueue.unshift(...batch);
+    }
+  }
+
   async handleMessage(message, direction) {
     const contato = message.fromMe ? message.to : message.from;
     const contatoInfo = await message.getContact();
