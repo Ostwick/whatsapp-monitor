@@ -32,7 +32,7 @@ class WhatsAppService {
     this.currentBatch = [];
     this.isProcessing = false;
     this.messageCount = 0;
-    this.sessionPath = path.join('.wwebjs_auth');
+    this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
 
     this.initializeClient();
     this.setupEventHandlers();
