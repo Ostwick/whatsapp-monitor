@@ -91,7 +91,7 @@ services:
     environment:
       - USER_ID=filial_ms
     volumes:
-      - ./sessions/filial_ms:/app/.wwebjs_auth/session-filial-ms
+      - ./sessions/filial_ms:/app/.wwebjs_auth/session-filial_ms
 
   filial_mt:
     <<: *whatsapp-defaults
@@ -100,7 +100,7 @@ services:
     environment:
       - USER_ID=filial_mt
     volumes:
-      - ./sessions/filial_mt:/app/.wwebjs_auth/session-filial-mt
+      - ./sessions/filial_mt:/app/.wwebjs_auth/session-filial_mt
 
   filial_go:
     <<: *whatsapp-defaults
@@ -109,7 +109,7 @@ services:
     environment:
       - USER_ID=filial_go
     volumes:
-      - ./sessions/filial_go:/app/.wwebjs_auth/session-filial-go
+      - ./sessions/filial_go:/app/.wwebjs_auth/session-filial_go
 
   filial_pr:
     <<: *whatsapp-defaults
@@ -118,7 +118,7 @@ services:
     environment:
       - USER_ID=filial_pr
     volumes:
-      - ./sessions/filial_pr:/app/.wwebjs_auth/session-filial-pr
+      - ./sessions/filial_pr:/app/.wwebjs_auth/session-filial_pr
 
   projetos:
     <<: *whatsapp-defaults
@@ -190,7 +190,7 @@ services:
     environment:
       - USER_ID=vhf_sp
     volumes:
-      - ./sessions/vhf_sp:/app/.wwebjs_auth/session-vhf-sp
+      - ./sessions/vhf_sp:/app/.wwebjs_auth/session-vhf_sp
 
   sul:
     <<: *whatsapp-defaults
@@ -208,7 +208,7 @@ services:
     environment:
       - USER_ID=vans_sp
     volumes:
-      - ./sessions/vans_sp:/app/.wwebjs_auth/session-vans-sp
+      - ./sessions/vans_sp:/app/.wwebjs_auth/session-vans_sp
 
   mg:
     <<: *whatsapp-defaults
