@@ -1,8 +1,8 @@
 version: "3.9"
 
 x-env-vars: &env-vars
-  L:       "${L:-C.UTF-8}"
-  TZ:      "${TZ:-America/Sao_Paulo}"
+  LC_ALL:     "${LC_ALL:-C.UTF-8}"
+  TZ:         "${TZ:-America/Sao_Paulo}"
   PGUSER:     "${PGUSER:-bi_script}"
   PGPASSWORD: "${PGPASSWORD}"           # defina em .env
   PGHOST:     "${PGHOST:-192.168.0.246}"
@@ -19,21 +19,36 @@ x-whatsapp-env: &whatsapp-env
   BATCH_SIZE:                "10"
   BATCH_INTERVAL:            "5000"
   PUPPETEER_DISABLE_PROFILE_LOCK: "true"
+  # Chrome optimization flags
+  CHROME_ARGS: "--no-sandbox --disable-dev-shm-usage --single-process --no-zygote --disable-gpu"
 
 x-whatsapp-defaults: &whatsapp-defaults
   build:
     context: .
     dockerfile: Dockerfile.whatsapp
   mem_limit: 320m
-  restart: "no"
+  restart: unless-stopped  # Changed from "no" to allow restarts
+  # Security options for Chrome
+  security_opt:
+    - seccomp:unconfined
+  cap_add:
+    - SYS_ADMIN
+  # Shared memory for Chrome
+  shm_size: 256m
   healthcheck:
     test: ["CMD", "node", "-e", "process.exit(process.memoryUsage().heapUsed > 280000000 ? 1 : 0)"]
-    interval: 30s
-    timeout: 5s
+    interval: 60s      # Increased interval to reduce load
+    timeout: 10s       # Increased timeout
     retries: 3
-    start_period: 30s
+    start_period: 60s  # Increased start period for WhatsApp initialization
+  # Multiple tmpfs mounts for Chrome
   tmpfs:
-    - /tmp/chrome:size=100000000
+    - /tmp:size=200m,exec
+    - /var/tmp:size=100m,exec
+    - /dev/shm:size=256m,exec
+  # Additional environment for container isolation
+  environment:
+    DISPLAY: ":99"
 
 x-api-defaults: &api-defaults
   build:
@@ -65,7 +80,6 @@ x-db-defaults: &db-defaults
     timeout: 5s
     retries: 5
 
-
 services:
   # Banco de dados
   postgres:
@@ -94,7 +108,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_ms:/app/.wwebjs_auth/session-filial_ms
+      - ./sessions/filial_ms:/app/.wwebjs_auth/session-filial_ms:rw
+      - /tmp/chrome-filial_ms:/tmp/chrome-filial_ms:rw
 
   filial_mt:
     <<: *whatsapp-defaults
@@ -107,7 +122,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_mt:/app/.wwebjs_auth/session-filial_mt
+      - ./sessions/filial_mt:/app/.wwebjs_auth/session-filial_mt:rw
+      - /tmp/chrome-filial_mt:/tmp/chrome-filial_mt:rw
 
   filial_pr:
     <<: *whatsapp-defaults
@@ -120,7 +136,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_pr:/app/.wwebjs_auth/session-filial_pr
+      - ./sessions/filial_pr:/app/.wwebjs_auth/session-filial_pr:rw
+      - /tmp/chrome-filial_pr:/tmp/chrome-filial_pr:rw
 
   filial_go:
     <<: *whatsapp-defaults
@@ -133,7 +150,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_go:/app/.wwebjs_auth/session-filial_go
+      - ./sessions/filial_go:/app/.wwebjs_auth/session-filial_go:rw
+      - /tmp/chrome-filial_go:/tmp/chrome-filial_go:rw
 
   projetos:
     <<: *whatsapp-defaults
@@ -146,7 +164,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/projetos:/app/.wwebjs_auth/session-projetos
+      - ./sessions/projetos:/app/.wwebjs_auth/session-projetos:rw
+      - /tmp/chrome-projetos:/tmp/chrome-projetos:rw
 
   comex1:
     <<: *whatsapp-defaults
@@ -159,7 +178,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/comex1:/app/.wwebjs_auth/session-comex1
+      - ./sessions/comex1:/app/.wwebjs_auth/session-comex1:rw
+      - /tmp/chrome-comex1:/tmp/chrome-comex1:rw
 
   comex2:
     <<: *whatsapp-defaults
@@ -172,7 +192,9 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/comex1:/app/.wwebjs_auth/session-comex2
+      # FIXED: Was pointing to comex1 sessions - now points to comex2
+      - ./sessions/comex2:/app/.wwebjs_auth/session-comex2:rw
+      - /tmp/chrome-comex2:/tmp/chrome-comex2:rw
 
   comex3:
     <<: *whatsapp-defaults
@@ -185,7 +207,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/comex3:/app/.wwebjs_auth/session-comex3
+      - ./sessions/comex3:/app/.wwebjs_auth/session-comex3:rw
+      - /tmp/chrome-comex3:/tmp/chrome-comex3:rw
 
   mg:
     <<: *whatsapp-defaults
@@ -198,7 +221,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/mg:/app/.wwebjs_auth/session-mg
+      - ./sessions/mg:/app/.wwebjs_auth/session-mg:rw
+      - /tmp/chrome-mg:/tmp/chrome-mg:rw
 
   sul:
     <<: *whatsapp-defaults
@@ -211,7 +235,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/sul:/app/.wwebjs_auth/session-sul
+      - ./sessions/sul:/app/.wwebjs_auth/session-sul:rw
+      - /tmp/chrome-sul:/tmp/chrome-sul:rw
 
   sudeste:
     <<: *whatsapp-defaults
@@ -224,7 +249,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste
+      - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste:rw
+      - /tmp/chrome-sudeste:/tmp/chrome-sudeste:rw
 
   nordeste:
     <<: *whatsapp-defaults
@@ -237,7 +263,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste
+      - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste:rw
+      - /tmp/chrome-nordeste:/tmp/chrome-nordeste:rw
 
   norte:
     <<: *whatsapp-defaults
@@ -250,7 +277,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/norte:/app/.wwebjs_auth/session-norte
+      - ./sessions/norte:/app/.wwebjs_auth/session-norte:rw
+      - /tmp/chrome-norte:/tmp/chrome-norte:rw
 
   vhf_sp:
     <<: *whatsapp-defaults
@@ -263,7 +291,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/vhf_sp:/app/.wwebjs_auth/session-vhf_sp
+      - ./sessions/vhf_sp:/app/.wwebjs_auth/session-vhf_sp:rw
+      - /tmp/chrome-vhf_sp:/tmp/chrome-vhf_sp:rw
 
   vans_sp:
     <<: *whatsapp-defaults
@@ -276,7 +305,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/vans_sp:/app/.wwebjs_auth/session-vans_sp
+      - ./sessions/vans_sp:/app/.wwebjs_auth/session-vans_sp:rw
+      - /tmp/chrome-vans_sp:/tmp/chrome-vans_sp:rw
 
 volumes:
   pgdata:
