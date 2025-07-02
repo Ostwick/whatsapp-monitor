@@ -42,8 +42,8 @@ x-whatsapp-defaults: &whatsapp-defaults
 # API service defaults
 x-api-defaults: &api-defaults
   build:
-    context: .
-    dockerfile: ./backend/Dockerfile.api
+    context: ./backend
+    dockerfile: Dockerfile.api
   mem_limit: 512m
   restart: unless-stopped
   environment:
