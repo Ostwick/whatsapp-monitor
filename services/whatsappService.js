@@ -1,97 +1,125 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const { setTimeout } = require('timers/promises');
 const qrcode = require('qrcode-terminal');
-
-const USER_ID = process.env.USER_ID || 'default';
-const API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:3000/api/mensagens';
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-const BATCH_SIZE = 10;
-const BATCH_INTERVAL = 5000; // 5 seconds
+const fs = require('fs');
+const path = require('path');
 
 class WhatsAppService {
   constructor() {
-    this.vendedorId = USER_ID;
+    this.USER_ID = process.env.USER_ID || 'default';
+    this.API_ENDPOINT = process.env.API_ENDPOINT || 'http://api:3000/api/mensagens';
+    this.vendedorId = this.USER_ID;
     this.currentBatch = [];
     this.isProcessing = false;
     this.messageCount = 0;
-    
-    // Memory optimization
+    this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
+
+    this.initializeClient();
+    this.setupEventHandlers();
+    this.startBatchProcessor();
+    this.startMemoryMonitor();
+    this.cleanSessionLocks();
+  }
+
+  initializeClient() {
     this.client = new Client({
       authStrategy: new LocalAuth({
-        dataPath: `.wwebjs_auth/session-${USER_ID}`,
-        dataPathCache: false // Disable session caching
+        clientId: this.USER_ID,
+        dataPath: this.sessionPath,
+        dataPathCache: false
       }),
       puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-        headless: 'new', // New headless mode
+        headless: 'new',
         args: [
           '--no-sandbox',
           '--disable-dev-shm-usage',
           '--single-process',
           '--no-zygote',
           '--disable-gpu',
-          '--disable-software-rasterizer',
+          `--user-data-dir=/tmp/chrome-${this.USER_ID}`,
           '--disable-extensions',
-          '--disable-setuid-sandbox',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding',
-          '--js-flags="--max-old-space-size=256"'
+          '--disable-background-networking'
         ]
       },
       takeoverOnConflict: true,
-      restartOnAuthFail: true,
-      ffmpegPath: false // Disable ffmpeg if not needed
+      restartOnAuthFail: true
     });
+  }
 
-    this.setupEventHandlers();
-    this.startBatchProcessor();
-    this.startMemoryMonitor();
+  cleanSessionLocks() {
+    try {
+      const locks = [
+        path.join(this.sessionPath, 'SingletonLock'),
+        path.join(this.sessionPath, '.session.lock')
+      ];
+
+      locks.forEach(lockPath => {
+        if (fs.existsSync(lockPath)) {
+          fs.unlinkSync(lockPath);
+          console.log(`Removed session lock: ${lockPath}`);
+        }
+      });
+    } catch (err) {
+      console.error('Error cleaning session locks:', err);
+    }
   }
 
   setupEventHandlers() {
+    this.client.on('qr', (qr) => {
+      console.log('\n\n=== WHATSAPP QR CODE ===');
+      console.log(`Instance: ${this.USER_ID}`);
+      console.log('Scan this QR code within 60 seconds:\n');
+      qrcode.generate(qr, { small: true });
+      this.saveQrToFile(qr).catch(console.error);
+    });
+
+    this.client.on('authenticated', () => {
+      console.log(`\n[${this.USER_ID}] Authentication successful!`);
+    });
+
     this.client.on('ready', () => {
-      if (this.client.info?.wid?.user) {
-        this.vendedorId = this.client.info.wid.user;
-      }
-      console.log(`WhatsApp conectado - Vendedor ID: ${this.vendedorId}`);
+      this.vendedorId = this.client.info?.wid?.user || this.USER_ID;
+      console.log(`\n[${this.USER_ID}] Client ready! Vendor ID: ${this.vendedorId}`);
+    });
+
+    this.client.on('disconnected', (reason) => {
+      console.log(`\n[${this.USER_ID}] Disconnected: ${reason}`);
+      this.scheduleReconnect();
     });
 
     this.client.on('message_create', async (msg) => {
       try {
-        const direction = msg.fromMe ? 'sent' : 'received';
-        const payload = await this.createMessagePayload(msg, direction);
-        
-        this.currentBatch.push(payload);
-        this.messageCount++;
-        
-        // Process immediately if batch is full
-        if (this.currentBatch.length >= BATCH_SIZE) {
-          this.processBatch();
-        }
+        const payload = await this.createMessagePayload(
+          msg,
+          msg.fromMe ? 'sent' : 'received'
+        );
+        this.queueMessage(payload);
       } catch (err) {
         console.error('Message processing error:', err);
       }
     });
+  }
 
-    this.client.on('qr', (qr) => {
-      console.clear();
-      console.log(`Escaneie o QR Code para conectar (${USER_ID}):`);
-      qrcode.generate(qr, { small: true });
-    });
+  async saveQrToFile(qr) {
+    const qrPath = path.join(this.sessionPath, 'qr.txt');
+    await fs.promises.writeFile(qrPath, qr);
+    console.log(`\nQR code saved to: ${qrPath}\n`);
+  }
 
-    this.client.on('disconnected', (reason) => {
-      console.log(`Sessão desconectada (${USER_ID}): ${reason}`);
-      this.scheduleReconnect();
-    });
+  queueMessage(payload) {
+    this.currentBatch.push(payload);
+    this.messageCount++;
+
+    if (this.currentBatch.length >= BATCH_SIZE) {
+      this.processBatch();
+    }
   }
 
   async createMessagePayload(message, direction) {
     const contato = message.fromMe ? message.to : message.from;
     const contatoInfo = await message.getContact();
-    
-    // Only get group info if needed
+
     let nomeGrupo = null;
     const isGroup = contato.endsWith('@g.us');
     if (isGroup) {
@@ -104,7 +132,7 @@ class WhatsAppService {
       contato,
       nome_contato: contatoInfo.name || contatoInfo.pushname || contatoInfo.number,
       nome_grupo: nomeGrupo,
-      mensagem: message.body.substring(0, 4000), // Truncate long messages
+      mensagem: message.body.substring(0, 4000),
       tipo: direction,
       data_envio: new Date().toISOString()
     };
@@ -115,21 +143,21 @@ class WhatsAppService {
       if (this.currentBatch.length > 0 && !this.isProcessing) {
         this.processBatch();
       }
-    }, BATCH_INTERVAL).unref(); // Allow process to exit despite interval
+    }, BATCH_INTERVAL).unref();
   }
 
   async processBatch() {
     if (this.isProcessing || this.currentBatch.length === 0) return;
-    
+
     this.isProcessing = true;
     const batchToSend = this.currentBatch.splice(0, BATCH_SIZE);
-    
+
     try {
       await this.sendBatchToApi(batchToSend);
       console.log(`[BATCH] Sent ${batchToSend.length} messages (Total: ${this.messageCount})`);
     } catch (err) {
       console.error('Batch failed, requeuing:', err);
-      this.currentBatch.unshift(...batchToSend); // Requeue failed items
+      this.currentBatch.unshift(...batchToSend);
     } finally {
       this.isProcessing = false;
     }
@@ -158,10 +186,10 @@ class WhatsAppService {
       const memory = process.memoryUsage();
       const rss = Math.round(memory.rss / 1024 / 1024);
       const heap = Math.round(memory.heapUsed / 1024 / 1024);
-      
+
       console.log(`[MEMORY] RSS: ${rss}MB | Heap: ${heap}MB | Messages: ${this.messageCount}`);
-      
-      if (memory.heapUsed > 300 * 1024 * 1024) { // 300MB
+
+      if (memory.heapUsed > 300 * 1024 * 1024) {
         this.cleanupMemory();
       }
     }, 30000).unref();
@@ -172,7 +200,7 @@ class WhatsAppService {
     if (global.gc) {
       global.gc();
     }
-    // Clear any cached data
+
     if (this.client) {
       this.client.pupPage?.evaluate(() => window.clearCache?.());
     }
@@ -180,7 +208,7 @@ class WhatsAppService {
 
   scheduleReconnect() {
     setTimeout(5000).then(() => {
-      console.log(`Attempting to reconnect ${USER_ID}...`);
+      console.log(`Attempting to reconnect ${this.USER_ID}...`);
       this.client.initialize().catch(err => {
         console.error('Reconnect failed:', err);
         this.scheduleReconnect();
@@ -189,15 +217,18 @@ class WhatsAppService {
   }
 
   initialize() {
+    this.cleanSessionLocks();
+
     this.client.initialize().catch(err => {
-      console.error('Initialization failed:', err);
+      console.error(`[${this.USER_ID}] Initialization error:`, err);
       this.scheduleReconnect();
     });
   }
 }
 
-// Singleton with cleanup
+// Singleton instance with cleanup
 const instance = new WhatsAppService();
+
 process.on('SIGINT', () => {
   console.log('Cleaning up before exit...');
   instance.client.destroy();
