@@ -152,7 +152,7 @@ class WhatsAppService {
       if (this.currentBatch.length > 0 && !this.isProcessing) {
         this.processBatch();
       }
-    }, BATCH_INTERVAL).unref();
+    }, BATCH_INTERVAL_MS).unref();
   }
 
   async processBatch() {
