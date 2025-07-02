@@ -1,18 +1,17 @@
-# Use official Node.js Alpine image for smaller size
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install dependencies first for better caching
-COPY package.json package-lock.json* ./  # Note the * for optional lockfile
+# Copy only package files first for caching
+COPY package.json .
 
-# If package-lock.json doesn't exist, create it with npm install
-RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+# Install production dependencies (creates lockfile if missing)
+RUN npm install --omit=dev --package-lock
 
-# Copy the rest of the application files
+# Copy the rest of application files
 COPY . .
 
-# Create non-root user and set permissions
+# Create non-root user
 RUN adduser -D appuser && \
     chown -R appuser:appuser /app
 USER appuser
