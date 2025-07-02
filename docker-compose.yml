@@ -9,7 +9,6 @@ x-env: &env-vars
   PGHOST: "${PGHOST:-192.168.0.246}"
   PGDATABASE: "${PGDATABASE:-BI_COMERCIAL}"
   PGPORT: "${PGPORT:-5432}"
-version: '3.9'
 
 # WhatsApp service defaults
 x-whatsapp-defaults: &whatsapp-defaults
