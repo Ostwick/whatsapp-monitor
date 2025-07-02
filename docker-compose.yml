@@ -88,7 +88,7 @@ services:
 
   # WhatsApp Client Services (15 instances)
   filial_ms:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_filial_ms
     ports: ["3101:3000"]
     environment:
@@ -97,7 +97,7 @@ services:
       - ./sessions/filial-ms:/app/.wwebjs_auth/session-filial-ms
 
   filial_mt:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_filial_mt
     ports: ["3102:3000"]
     environment:
@@ -106,7 +106,7 @@ services:
       - ./sessions/filial-mt:/app/.wwebjs_auth/session-filial-mt
 
   filial_go:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_filial_go
     ports: ["3103:3000"]
     environment:
@@ -115,7 +115,7 @@ services:
       - ./sessions/filial-go:/app/.wwebjs_auth/session-filial-go
 
   filial_pr:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_filial_pr
     ports: ["3104:3000"]
     environment:
@@ -124,7 +124,7 @@ services:
       - ./sessions/filial-pr:/app/.wwebjs_auth/session-filial-pr
 
   projetos:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_projetos
     ports: ["3105:3000"]
     environment:
@@ -133,7 +133,7 @@ services:
       - ./sessions/projetos:/app/.wwebjs_auth/session-projetos
 
   comex1:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_comex1
     ports: ["3106:3000"]
     environment:
@@ -142,7 +142,7 @@ services:
       - ./sessions/comex1:/app/.wwebjs_auth/session-comex1
 
   comex2:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_comex2
     ports: ["3107:3000"]
     environment:
@@ -151,7 +151,7 @@ services:
       - ./sessions/comex2:/app/.wwebjs_auth/session-comex2
 
   comex3:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_comex3
     ports: ["3108:3000"]
     environment:
@@ -160,7 +160,7 @@ services:
       - ./sessions/comex3:/app/.wwebjs_auth/session-comex3
 
   nordeste:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_nordeste
     ports: ["3109:3000"]
     environment:
@@ -169,7 +169,7 @@ services:
       - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste
 
   norte:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_norte
     ports: ["3110:3000"]
     environment:
@@ -178,7 +178,7 @@ services:
       - ./sessions/norte:/app/.wwebjs_auth/session-norte
 
   sudeste:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_sudeste
     ports: ["3111:3000"]
     environment:
@@ -187,7 +187,7 @@ services:
       - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste
 
   vhf-sp:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_vhf-sp
     ports: ["3112:3000"]
     environment:
@@ -196,7 +196,7 @@ services:
       - ./sessions/vhf-sp:/app/.wwebjs_auth/session-vhf-sp
 
   sul:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_sul
     ports: ["3113:3000"]
     environment:
@@ -205,7 +205,7 @@ services:
       - ./sessions/sul:/app/.wwebjs_auth/session-sul
 
   vans-sp:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_vans-sp
     ports: ["3114:3000"]
     environment:
@@ -214,7 +214,7 @@ services:
       - ./sessions/vans-sp:/app/.wwebjs_auth/session-vans-sp
 
   mg:
-    <<: *whatsapp-defaults
+    <<: *whatsapp-service
     container_name: app_mg
     ports: ["3115:3000"]
     environment:
