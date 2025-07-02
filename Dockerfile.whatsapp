@@ -42,11 +42,9 @@ RUN apt-get update && apt-get install -y \
 RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
 # Create necessary directories with proper permissions
-RUN mkdir -p /tmp/chrome /var/tmp /app/.wwebjs_auth && \
-    chmod 1777 /tmp && \
-    chmod 1777 /var/tmp && \
-    chmod 755 /tmp/chrome && \
-    chown -R appuser:appuser /app
+RUN mkdir -p /tmp/chrome-${USER_ID} && \
+    chown -R appuser:appuser /tmp/chrome-* && \
+    chown -R appuser:appuser .wwebjs_auth
 
 # Copy package files and install dependencies
 COPY --chown=appuser:appuser package*.json ./
