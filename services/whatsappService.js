@@ -15,8 +15,8 @@ const MEMORY_CHECK_INTERVAL_MS = 30000;
 
 class WhatsAppService {
   constructor() {
-    this.USER_ID = process.env.USER_ID || 'default';
-    this.API_ENDPOINT = process.env.API_ENDPOINT || 'http://api:3000/api/mensagens';
+    this.USER_ID = process.env.USER_ID || DEFAULT_USER_ID;
+    this.API_ENDPOINT = process.env.API_ENDPOINT || DEFAULT_API_ENDPOINT;
     this.vendedorId = this.USER_ID;
     this.currentBatch = [];
     this.isProcessing = false;
@@ -193,15 +193,12 @@ class WhatsAppService {
   startMemoryMonitor() {
     setInterval(() => {
       const memory = process.memoryUsage();
-      const rss = Math.round(memory.rss / 1024 / 1024);
-      const heap = Math.round(memory.heapUsed / 1024 / 1024);
-
-      console.log(`[MEMORY] RSS: ${rss}MB | Heap: ${heap}MB | Messages: ${this.messageCount}`);
-
-      if (memory.heapUsed > 300 * 1024 * 1024) {
+      const usedMB = Math.round(memory.heapUsed / 1024 / 1024);
+      
+      if (usedMB > MEMORY_LIMIT_MB) {
         this.cleanupMemory();
       }
-    }, 30000).unref();
+    }, MEMORY_CHECK_INTERVAL_MS).unref();
   }
 
   cleanupMemory() {
