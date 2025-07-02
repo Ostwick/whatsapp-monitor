@@ -1,19 +1,12 @@
 FROM node:18-slim
-
-# Defina o diretório de trabalho
 WORKDIR /app
 
-# Copia os manifests de npm (package.json e package-lock.json)
+# Agora esses arquivos estão em ./backend/
 COPY package*.json ./
 
-# Instala as dependências
-RUN npm install --production
+RUN npm ci --omit=dev
 
-# Copia todo o restante do código da API
 COPY . .
 
-# Expõe a porta da API
 EXPOSE 3000
-
-# Comando de inicialização
 CMD ["node", "api.js"]
