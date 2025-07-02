@@ -1,34 +1,36 @@
-FROM node:18-slim
+FROM node:18.17.1-slim
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
     fonts-liberation \
+    libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
     libgbm1 \
-    libgtk-3-0 \
+    libnss3 \
     libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
+    libxshmfence1 \
     libxrandr2 \
-    libasound2 \
-    libnss3 \
-    libxshmfence-dev \
-    libgconf-2-4 \
-    xdg-utils \
-    ca-certificates \
-    --no-install-recommends \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV NODE_ENV=production
+ENV DISABLE_GPU=1
+ENV CHROMIUM_FLAGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --single-process"
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --prefer-offline --no-audit --progress=false
 
 COPY . .
 
-RUN npm ci --omit=dev
+RUN chown -R node:node /app
+USER node
 
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["node", "src/index.js"]
