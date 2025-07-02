@@ -264,6 +264,7 @@ class WhatsAppService {
 
 // Singleton instance with cleanup
 const instance = new WhatsAppService();
+instance.initialize();
 
 process.on('SIGINT', () => {
   console.log('Cleaning up before exit...');
