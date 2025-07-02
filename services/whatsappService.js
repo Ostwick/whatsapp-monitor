@@ -23,7 +23,6 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection:', reason);
 });
 
-
 class WhatsAppService {
   constructor() {
     this.USER_ID = process.env.USER_ID || DEFAULT_USER_ID;
@@ -33,23 +32,68 @@ class WhatsAppService {
     this.isProcessing = false;
     this.messageCount = 0;
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
-
+    
+    // Clean up any existing processes and locks before starting
+    this.cleanupBeforeStart();
+    
     this.initializeClient();
     this.setupEventHandlers();
     this.startBatchProcessor();
     this.startMemoryMonitor();
-    this.cleanSessionLocks();
-  
+    
     this.initialize();   
   }
+
+  async cleanupBeforeStart() {
+    try {
+      // Kill any existing Chrome processes
+      const { exec } = require('child_process');
+      await new Promise((resolve) => {
+        exec('pkill -f chrome', (error) => {
+          // Ignore errors - process might not exist
+          resolve();
+        });
+      });
+      
+      // Wait a bit for processes to die
+      await setTimeout(2000);
+      
+      // Clean session locks
+      this.cleanSessionLocks();
+      
+      // Clean Chrome user data directories
+      this.cleanChromeUserData();
+      
+    } catch (err) {
+      console.error('Error during cleanup:', err);
+    }
+  }
+
+  cleanChromeUserData() {
+    try {
+      const chromeDataPath = `/tmp/chrome-${this.USER_ID}`;
+      if (fs.existsSync(chromeDataPath)) {
+        fs.rmSync(chromeDataPath, { recursive: true, force: true });
+        console.log(`Cleaned Chrome user data: ${chromeDataPath}`);
+      }
+    } catch (err) {
+      console.error('Error cleaning Chrome user data:', err);
+    }
+  }
+
   initializeClient() {
-  console.log(`[${this.USER_ID}] Criando client WhatsApp...`);
-  this.client = new Client({
-    authStrategy: new LocalAuth({
-      clientId: this.USER_ID,
-      dataPath: this.sessionPath,
-      dataPathCache: false
-    }),
+    console.log(`[${this.USER_ID}] Criando client WhatsApp...`);
+    
+    // Generate unique user data directory
+    const timestamp = Date.now();
+    const chromeUserDataDir = `/tmp/chrome-${this.USER_ID}-${timestamp}`;
+    
+    this.client = new Client({
+      authStrategy: new LocalAuth({
+        clientId: this.USER_ID,
+        dataPath: this.sessionPath,
+        dataPathCache: false
+      }),
       puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: 'new',
@@ -59,14 +103,35 @@ class WhatsAppService {
           '--single-process',
           '--no-zygote',
           '--disable-gpu',
-          `--user-data-dir=/tmp/chrome-${this.USER_ID}`,
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          `--user-data-dir=${chromeUserDataDir}`,
           '--disable-extensions',
-          '--disable-background-networking'
+          '--disable-background-networking',
+          '--disable-background-timer-throttling',
+          '--disable-renderer-backgrounding',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-client-side-phishing-detection',
+          '--disable-sync',
+          '--disable-translate',
+          '--disable-ipc-flooding-protection',
+          '--no-first-run',
+          '--no-default-browser-check',
+          '--disable-default-apps',
+          '--disable-popup-blocking',
+          '--disable-prompt-on-repost',
+          '--disable-hang-monitor',
+          '--disable-component-update',
+          '--force-color-profile=srgb',
+          '--disable-blink-features=AutomationControlled',
+          '--disable-features=TranslateUI,BlinkGenPropertyTrees'
         ]
       },
       takeoverOnConflict: true,
+      takeoverTimeoutMs: 30000,
       restartOnAuthFail: true
     });
+    
     console.log(`[${this.USER_ID}] Cliente criado, chamando .initialize()...`);
   }
 
@@ -74,15 +139,34 @@ class WhatsAppService {
     try {
       const locks = [
         path.join(this.sessionPath, 'SingletonLock'),
-        path.join(this.sessionPath, '.session.lock')
+        path.join(this.sessionPath, '.session.lock'),
+        path.join(this.sessionPath, 'Default', 'SingletonLock'),
+        path.join(this.sessionPath, 'SingletonSocket'),
+        path.join(this.sessionPath, 'SingletonCookie')
       ];
-
+      
       locks.forEach(lockPath => {
         if (fs.existsSync(lockPath)) {
-          fs.unlinkSync(lockPath);
-          console.log(`Removed session lock: ${lockPath}`);
+          try {
+            fs.unlinkSync(lockPath);
+            console.log(`Removed session lock: ${lockPath}`);
+          } catch (err) {
+            console.warn(`Could not remove lock ${lockPath}:`, err.message);
+          }
         }
       });
+
+      // Also try to remove the entire Default directory if it exists
+      const defaultDir = path.join(this.sessionPath, 'Default');
+      if (fs.existsSync(defaultDir)) {
+        try {
+          fs.rmSync(defaultDir, { recursive: true, force: true });
+          console.log(`Removed Default directory: ${defaultDir}`);
+        } catch (err) {
+          console.warn(`Could not remove Default directory:`, err.message);
+        }
+      }
+      
     } catch (err) {
       console.error('Error cleaning session locks:', err);
     }
@@ -121,8 +205,8 @@ class WhatsAppService {
       } catch (err) {
         console.error('Message processing error:', err);
       }
-      
     });
+
     this.client.on('change_state', state => {
       console.log(`[${this.USER_ID}] State changed: ${state}`);
     });
@@ -137,19 +221,28 @@ class WhatsAppService {
     
     this.client.on('auth_failure', msg => {
       console.error(`[${this.USER_ID}] Auth Failure:`, msg);
+      // Clean up and try again
+      this.cleanupBeforeStart().then(() => {
+        setTimeout(() => this.scheduleReconnect(), 5000);
+      });
     });
   }
 
   async saveQrToFile(qr) {
-    const qrPath = path.join(this.sessionPath, 'qr.txt');
-    await fs.promises.writeFile(qrPath, qr);
-    console.log(`\nQR code saved to: ${qrPath}\n`);
+    try {
+      // Ensure directory exists
+      await fs.promises.mkdir(this.sessionPath, { recursive: true });
+      const qrPath = path.join(this.sessionPath, 'qr.txt');
+      await fs.promises.writeFile(qrPath, qr);
+      console.log(`\nQR code saved to: ${qrPath}\n`);
+    } catch (err) {
+      console.error('Error saving QR code:', err);
+    }
   }
 
   queueMessage(payload) {
     this.currentBatch.push(payload);
     this.messageCount++;
-
     if (this.currentBatch.length >= BATCH_SIZE) {
       this.processBatch();
     }
@@ -158,9 +251,9 @@ class WhatsAppService {
   async createMessagePayload(message, direction) {
     const contato = message.fromMe ? message.to : message.from;
     const contatoInfo = await message.getContact();
-
     let nomeGrupo = null;
     const isGroup = contato.endsWith('@g.us');
+    
     if (isGroup) {
       const chat = await message.getChat();
       nomeGrupo = chat.name;
@@ -187,10 +280,10 @@ class WhatsAppService {
 
   async processBatch() {
     if (this.isProcessing || this.currentBatch.length === 0) return;
-
+    
     this.isProcessing = true;
     const batchToSend = this.currentBatch.splice(0, BATCH_SIZE);
-
+    
     try {
       await this.sendBatchToApi(batchToSend);
       console.log(`[BATCH] Sent ${batchToSend.length} messages (Total: ${this.messageCount})`);
@@ -210,12 +303,12 @@ class WhatsAppService {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(batch)
         });
-
+        
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return;
       } catch (err) {
         if (attempt === MAX_RETRIES) throw err;
-        await setTimeout(RETRY_DELAY * attempt);
+        await setTimeout(RETRY_DELAY_MS * attempt);
       }
     }
   }
@@ -236,40 +329,83 @@ class WhatsAppService {
     if (global.gc) {
       global.gc();
     }
-
     if (this.client) {
       this.client.pupPage?.evaluate(() => window.clearCache?.());
     }
   }
 
-  scheduleReconnect() {
-    setTimeout(5000).then(() => {
+  async scheduleReconnect() {
+    console.log(`Scheduling reconnect for ${this.USER_ID} in 5 seconds...`);
+    await setTimeout(5000);
+    
+    try {
+      // Clean up before reconnecting
+      if (this.client) {
+        await this.client.destroy();
+      }
+      
+      await this.cleanupBeforeStart();
+      
+      // Recreate client
+      this.initializeClient();
+      this.setupEventHandlers();
+      
       console.log(`Attempting to reconnect ${this.USER_ID}...`);
-      this.client.initialize().catch(err => {
-        console.error('Reconnect failed:', err);
-        this.scheduleReconnect();
-      });
-    });
+      await this.client.initialize();
+      
+    } catch (err) {
+      console.error('Reconnect failed:', err);
+      this.scheduleReconnect();
+    }
   }
 
-  initialize() {
-    this.cleanSessionLocks();
-    this.client.initialize().catch(err => {
+  async initialize() {
+    try {
+      await this.client.initialize();
+    } catch (err) {
       console.error(`[${this.USER_ID}] Initialization error:`, err);
       this.scheduleReconnect();
-    });
+    }
+  }
+
+  async destroy() {
+    console.log(`[${this.USER_ID}] Destroying client...`);
+    try {
+      if (this.client) {
+        await this.client.destroy();
+      }
+      await this.cleanupBeforeStart();
+    } catch (err) {
+      console.error('Error during destroy:', err);
+    }
   }
 }
 
 // Singleton instance with cleanup
 const instance = new WhatsAppService();
 
-process.on('SIGINT', () => {
+// Enhanced cleanup on exit
+process.on('SIGINT', async () => {
   console.log('Cleaning up before exit...');
-  instance.client.destroy();
-  process.exit();
+  try {
+    await instance.destroy();
+  } catch (err) {
+    console.error('Error during cleanup:', err);
+  }
+  process.exit(0);
 });
 
-setInterval(() => {}, 1 << 30); // loop infinito para manter vivo
+process.on('SIGTERM', async () => {
+  console.log('Received SIGTERM, cleaning up...');
+  try {
+    await instance.destroy();
+  } catch (err) {
+    console.error('Error during cleanup:', err);
+  }
+  process.exit(0);
+});
+
+// Keep alive loop
+setInterval(() => {}, 1 << 30);
 
 module.exports = instance;
