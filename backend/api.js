@@ -1,7 +1,7 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const { insertMensagens } = require('./postgres');
-
+const PORT = process.env.PORT || 3000;
 const app = express();
 
 // Strict request handling
@@ -71,5 +71,10 @@ app.use((err, req, res, next) => {
     requestId: req.id 
   });
 });
+
+app.listen(PORT, () => {
+  console.log(`API server running on port ${PORT}`);
+});
+
 
 module.exports = app;
