@@ -1,9 +1,9 @@
 version: '3.9'
 
 x-whatsapp-defaults: &whatsapp-defaults
-  build:
-    context: ./whatsapp-client
-    dockerfile: Dockerfile
+  build: 
+    context: .
+    dockerfile: Dockerfile.whatsapp
   mem_limit: 320m
   restart: unless-stopped
   environment:
@@ -12,13 +12,17 @@ x-whatsapp-defaults: &whatsapp-defaults
     - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
     - DISABLE_GPU=1
     - API_ENDPOINT=http://api:3000/api/mensagens
+    - BATCH_SIZE=10
+    - BATCH_INTERVAL=5000
   healthcheck:
     test: ["CMD", "node", "-e", "process.exit(process.memoryUsage().heapUsed > 280000000 ? 1 : 0)"]
     interval: 30s
     timeout: 5s
     retries: 3
+    start_period: 30s
 
 services:
+  # WhatsApp Client Services (15 instances)
   filial_ms:
     <<: *whatsapp-defaults
     container_name: app_filial_ms
@@ -40,8 +44,7 @@ services:
   filial_pr:
     <<: *whatsapp-defaults
     container_name: app_filial_pr
-    ports:
-      - "3103:3000"
+    ports: ["3103:3000"]
     environment:
       - USER_ID=filial-pr
     volumes:
@@ -50,8 +53,7 @@ services:
   filial_go:
     <<: *whatsapp-defaults
     container_name: app_filial_go
-    ports:
-      - "3104:3000"
+    ports: ["3104:3000"]
     environment:
       - USER_ID=filial-go
     volumes:
@@ -60,8 +62,7 @@ services:
   vhf_sp:
     <<: *whatsapp-defaults
     container_name: app_vhf_sp
-    ports:
-      - "3105:3000"
+    ports: ["3105:3000"]
     environment:
       - USER_ID=vhf-sp
     volumes:
@@ -70,8 +71,7 @@ services:
   vans_sp:
     <<: *whatsapp-defaults
     container_name: app_vans_sp
-    ports:
-      - "3106:3000"
+    ports: ["3106:3000"]
     environment:
       - USER_ID=vans-sp
     volumes:
@@ -80,8 +80,7 @@ services:
   sudeste:
     <<: *whatsapp-defaults
     container_name: app_sudeste
-    ports:
-      - "3107:3000"
+    ports: ["3107:3000"]
     environment:
       - USER_ID=sudeste
     volumes:
@@ -90,8 +89,7 @@ services:
   sul:
     <<: *whatsapp-defaults
     container_name: app_sul
-    ports:
-      - "3108:3000"
+    ports: ["3108:3000"]
     environment:
       - USER_ID=sul
     volumes:
@@ -100,8 +98,7 @@ services:
   mg:
     <<: *whatsapp-defaults
     container_name: app_mg
-    ports:
-      - "3109:3000"
+    ports: ["3109:3000"]
     environment:
       - USER_ID=mg
     volumes:
@@ -110,8 +107,7 @@ services:
   norte:
     <<: *whatsapp-defaults
     container_name: app_norte
-    ports:
-      - "3110:3000"
+    ports: ["3110:3000"]
     environment:
       - USER_ID=norte
     volumes:
@@ -120,8 +116,7 @@ services:
   nordeste:
     <<: *whatsapp-defaults
     container_name: app_nordeste
-    ports:
-      - "3111:3000"
+    ports: ["3111:3000"]
     environment:
       - USER_ID=nordeste
     volumes:
@@ -130,8 +125,7 @@ services:
   projetos:
     <<: *whatsapp-defaults
     container_name: app_projetos
-    ports:
-      - "3112:3000"
+    ports: ["3112:3000"]
     environment:
       - USER_ID=projetos
     volumes:
@@ -140,8 +134,7 @@ services:
   comex1:
     <<: *whatsapp-defaults
     container_name: app_comex1
-    ports:
-      - "3113:3000"
+    ports: ["3113:3000"]
     environment:
       - USER_ID=comex1
     volumes:
@@ -150,8 +143,7 @@ services:
   comex2:
     <<: *whatsapp-defaults
     container_name: app_comex2
-    ports:
-      - "3114:3000"
+    ports: ["3114:3000"]
     environment:
       - USER_ID=comex2
     volumes:
@@ -160,8 +152,7 @@ services:
   comex3:
     <<: *whatsapp-defaults
     container_name: app_comex3
-    ports:
-      - "3115:3000"
+    ports: ["3115:3000"]
     environment:
       - USER_ID=comex3
     volumes:
@@ -173,8 +164,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.api
     container_name: whatsapp_api
-    ports:
-      - "3000:3000"
+    ports: ["3000:3000"]
     environment:
       - NODE_ENV=production
       - NODE_OPTIONS=--max-old-space-size=384
@@ -183,8 +173,7 @@ services:
       - PGDATABASE=${DB_NAME:-whatsapp}
       - PGPASSWORD=${DB_PASSWORD:-postgres}
       - PGPORT=5432
-    volumes:
-      - ./backend:/app
+      - MAX_BATCH_SIZE=25
     mem_limit: 512m
     depends_on:
       postgres:
