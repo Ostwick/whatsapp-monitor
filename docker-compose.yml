@@ -4,6 +4,11 @@ version: '3.9'
 x-env: &env-vars
   L: ${L:-C.UTF-8}
   TZ: ${TZ:-America/Sao_Paulo}
+  PGUSER: ${PGUSER:-bi_script}
+  PGPASSWORD: ${PGPASSWORD}
+  PGHOST: ${PGHOST:-192.168.0.246}
+  PGDATABASE: ${PGDATABASE:-BI_COMERCIAL}
+  PGPORT: ${PGPORT:-5432}
 
 # WhatsApp service defaults
 x-whatsapp-defaults: &whatsapp-defaults
