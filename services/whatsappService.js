@@ -34,11 +34,13 @@ class WhatsAppService {
     this.messageCount = 0;
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
 
-    this.initialize();
+    this.initializeClient();
     this.setupEventHandlers();
     this.startBatchProcessor();
     this.startMemoryMonitor();
     this.cleanSessionLocks();
+  
+    this.initialize();   
   }
   initializeClient() {
   console.log(`[${this.USER_ID}] Criando client WhatsApp...`);
