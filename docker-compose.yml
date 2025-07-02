@@ -1,15 +1,15 @@
 version: '3.9'
 
 # Shared environment variables
-x-env: &default-environment
-  L: ${L:-C.UTF-8}
-  TZ: ${TZ:-America/Sao_Paulo}
-  PGUSER: ${PGUSER:-bi_script}
-  PGPASSWORD: ${PGPASSWORD}
-  PGHOST: ${PGHOST:-192.168.0.246}
-  PGDATABASE: ${PGDATABASE:-BI_COMERCIAL}
-  PGPORT: ${PGPORT:-5432}
-
+x-env: &env-vars
+  L: "${L:-C.UTF-8}"
+  TZ: "${TZ:-America/Sao_Paulo}"
+  PGUSER: "${PGUSER:-bi_script}"
+  PGPASSWORD: "${PGPASSWORD}"
+  PGHOST: "${PGHOST:-192.168.0.246}"
+  PGDATABASE: "${PGDATABASE:-BI_COMERCIAL}"
+  PGPORT: "${PGPORT:-5432}"
+  
 # WhatsApp service defaults
 x-whatsapp-defaults: &whatsapp-defaults
   build: 
@@ -18,15 +18,15 @@ x-whatsapp-defaults: &whatsapp-defaults
   mem_limit: 320m
   restart: unless-stopped
   environment:
-    <<: *default-environment
-    - NODE_ENV=production
-    - NODE_OPTIONS=--max-old-space-size=280
-    - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-    - DISABLE_GPU=1
-    - API_ENDPOINT=http://api:3000/api/mensagens
-    - BATCH_SIZE=10
-    - BATCH_INTERVAL=5000
-    - PUPPETEER_DISABLE_PROFILE_LOCK=true
+    <<: *env-vars
+    NODE_ENV: "production"
+    NODE_OPTIONS: "--max-old-space-size=280"
+    PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium"
+    DISABLE_GPU: "1"
+    API_ENDPOINT: "http://api:3000/api/mensagens"
+    BATCH_SIZE: "10"
+    BATCH_INTERVAL: "5000"
+    PUPPETEER_DISABLE_PROFILE_LOCK: "true"
   healthcheck:
     test: ["CMD", "node", "-e", "process.exit(process.memoryUsage().heapUsed > 280000000 ? 1 : 0)"]
     interval: 30s
@@ -37,23 +37,20 @@ x-whatsapp-defaults: &whatsapp-defaults
     - type: tmpfs
       target: /tmp/chrome
       tmpfs:
-        size: 100000000  # 100MB for Chrome temp files
+        size: 100000000
 
 # API service defaults
-x-api-service: &api-service
+x-api-defaults: &api-defaults
   build:
     context: ./backend
     dockerfile: Dockerfile.api
   mem_limit: 512m
   restart: unless-stopped
   environment:
-    <<: *default-environment
+    <<: *env-vars
     NODE_ENV: "production"
     NODE_OPTIONS: "--max-old-space-size=384"
     MAX_BATCH_SIZE: "25"
-  depends_on:
-    postgres:
-      condition: service_healthy
 
 # Database defaults
 x-db-defaults: &db-defaults
@@ -82,49 +79,49 @@ services:
 
   # API Service
   api:
-    <<: *api-service
+    <<: *api-defaults
     container_name: whatsapp_api
     ports: ["3000:3000"]
 
   # WhatsApp Client Services (15 instances)
   filial_ms:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_filial_ms
     ports: ["3101:3000"]
     environment:
-      - USER_ID=filial-ms
+      - USER_ID=filial_ms
     volumes:
-      - ./sessions/filial-ms:/app/.wwebjs_auth/session-filial-ms
+      - ./sessions/filial_ms:/app/.wwebjs_auth/session-filial-ms
 
   filial_mt:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_filial_mt
     ports: ["3102:3000"]
     environment:
-      - USER_ID=filial-mt
+      - USER_ID=filial_mt
     volumes:
-      - ./sessions/filial-mt:/app/.wwebjs_auth/session-filial-mt
+      - ./sessions/filial_mt:/app/.wwebjs_auth/session-filial-mt
 
   filial_go:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_filial_go
     ports: ["3103:3000"]
     environment:
-      - USER_ID=filial-go
+      - USER_ID=filial_go
     volumes:
-      - ./sessions/filial-go:/app/.wwebjs_auth/session-filial-go
+      - ./sessions/filial_go:/app/.wwebjs_auth/session-filial-go
 
   filial_pr:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_filial_pr
     ports: ["3104:3000"]
     environment:
-      - USER_ID=filial-pr
+      - USER_ID=filial_pr
     volumes:
-      - ./sessions/filial-pr:/app/.wwebjs_auth/session-filial-pr
+      - ./sessions/filial_pr:/app/.wwebjs_auth/session-filial-pr
 
   projetos:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_projetos
     ports: ["3105:3000"]
     environment:
@@ -133,7 +130,7 @@ services:
       - ./sessions/projetos:/app/.wwebjs_auth/session-projetos
 
   comex1:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_comex1
     ports: ["3106:3000"]
     environment:
@@ -142,7 +139,7 @@ services:
       - ./sessions/comex1:/app/.wwebjs_auth/session-comex1
 
   comex2:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_comex2
     ports: ["3107:3000"]
     environment:
@@ -151,7 +148,7 @@ services:
       - ./sessions/comex2:/app/.wwebjs_auth/session-comex2
 
   comex3:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_comex3
     ports: ["3108:3000"]
     environment:
@@ -160,7 +157,7 @@ services:
       - ./sessions/comex3:/app/.wwebjs_auth/session-comex3
 
   nordeste:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_nordeste
     ports: ["3109:3000"]
     environment:
@@ -169,7 +166,7 @@ services:
       - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste
 
   norte:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_norte
     ports: ["3110:3000"]
     environment:
@@ -178,7 +175,7 @@ services:
       - ./sessions/norte:/app/.wwebjs_auth/session-norte
 
   sudeste:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_sudeste
     ports: ["3111:3000"]
     environment:
@@ -187,16 +184,16 @@ services:
       - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste
 
   vhf-sp:
-    <<: *whatsapp-service
-    container_name: app_vhf-sp
+    <<: *whatsapp-defaults
+    container_name: app_vhf_sp
     ports: ["3112:3000"]
     environment:
-      - USER_ID=vhf-sp
+      - USER_ID=vhf_sp
     volumes:
-      - ./sessions/vhf-sp:/app/.wwebjs_auth/session-vhf-sp
+      - ./sessions/vhf_sp:/app/.wwebjs_auth/session-vhf-sp
 
   sul:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_sul
     ports: ["3113:3000"]
     environment:
@@ -205,13 +202,13 @@ services:
       - ./sessions/sul:/app/.wwebjs_auth/session-sul
 
   vans-sp:
-    <<: *whatsapp-service
-    container_name: app_vans-sp
+    <<: *whatsapp-defaults
+    container_name: app_vans_sp
     ports: ["3114:3000"]
     environment:
-      - USER_ID=vans-sp
+      - USER_ID=vans_sp
     volumes:
-      - ./sessions/vans-sp:/app/.wwebjs_auth/session-vans-sp
+      - ./sessions/vans_sp:/app/.wwebjs_auth/session-vans-sp
 
   mg:
     <<: *whatsapp-service
