@@ -4,12 +4,6 @@ const { insertMensagens } = require('./postgres');
 
 const app = express();
 
-// Enhanced security
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable if not using web views
-  hsts: { maxAge: 31536000, includeSubDomains: true }
-}));
-
 // Strict request handling
 app.use(express.json({ 
   limit: '10kb',
