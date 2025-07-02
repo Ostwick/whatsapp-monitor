@@ -32,7 +32,7 @@ class WhatsAppService {
     this.currentBatch = [];
     this.isProcessing = false;
     this.messageCount = 0;
-    this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
+    this.sessionPath = path.join('.wwebjs_auth');
 
     this.initializeClient();
     this.setupEventHandlers();
@@ -205,7 +205,7 @@ class WhatsAppService {
   async sendBatchToApi(batch) {
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const response = await fetch(`${API_ENDPOINT}/batch`, {
+        const response = await fetch(`${this.API_ENDPOINT}/batch`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(batch)
@@ -254,7 +254,6 @@ class WhatsAppService {
 
   initialize() {
     this.cleanSessionLocks();
-
     this.client.initialize().catch(err => {
       console.error(`[${this.USER_ID}] Initialization error:`, err);
       this.scheduleReconnect();
@@ -264,7 +263,6 @@ class WhatsAppService {
 
 // Singleton instance with cleanup
 const instance = new WhatsAppService();
-instance.initialize();
 
 process.on('SIGINT', () => {
   console.log('Cleaning up before exit...');
