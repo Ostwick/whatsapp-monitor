@@ -13,6 +13,17 @@ const BATCH_INTERVAL_MS = 5000;
 const MEMORY_LIMIT_MB = 280;
 const MEMORY_CHECK_INTERVAL_MS = 30000;
 
+console.log('Iniciando serviço WhatsApp...');
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
+
 class WhatsAppService {
   constructor() {
     this.USER_ID = process.env.USER_ID || DEFAULT_USER_ID;
