@@ -1,0 +1,47 @@
+# Use the official Node.js slim image
+FROM node:18-slim
+
+# Install Chromium and essential dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libgbm1 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxshmfence1 \
+    libxrandr2 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for Puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV DISABLE_GPU=1
+ENV CHROMIUM_FLAGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --single-process"
+
+# Create and set working directory
+WORKDIR /app
+
+# Copy package files first for better layer caching
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --omit=dev --ignore-scripts
+
+# Copy application files
+COPY . .
+
+# Create a non-root user and switch to it
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
+    CMD node -e "process.exit(process.memoryUsage().heapUsed > 280000000 ? 1 : 0)" || exit 1
+
+# Start command
+CMD ["node", "src/index.js"]  # Adjust this to match your main file path
