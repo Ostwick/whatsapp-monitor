@@ -60,9 +60,9 @@ x-db-defaults: &db-defaults
   restart: unless-stopped
   environment:
     <<: *env-vars
-    POSTGRES_PASSWORD: "${PGPASSWORD:-bi_script_sua_senha_aqui}"
-    POSTGRES_USER: "${PGUSER:-bi_script}"
-    POSTGRES_DB: "${PGDATABASE:-BI_COMERCIAL}"
+    POSTGRES_PASSWORD: "${PGPASSWORD}"
+    POSTGRES_USER: "${PGUSER}"
+    POSTGRES_DB: "${PGDATABASE}"
   volumes:
     - pgdata:/var/lib/postgresql/data
     - ./backend/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
