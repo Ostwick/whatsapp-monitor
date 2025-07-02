@@ -24,6 +24,7 @@ client.on('ready', () => {
 });
 
 async function handleMessage(message, direction) {
+  console.log('Handling message:', message.body);
   const contato = message.fromMe ? message.to : message.from;
   const contatoInfo = await message.getContact();
   const nomeContato = contatoInfo.name || contatoInfo.pushname || contatoInfo.number;
