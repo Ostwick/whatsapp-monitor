@@ -211,7 +211,7 @@ services:
       - ./sessions/vans_sp:/app/.wwebjs_auth/session-vans-sp
 
   mg:
-    <<: *whatsapp-service
+    <<: *whatsapp-defaults
     container_name: app_mg
     ports: ["3115:3000"]
     environment:
