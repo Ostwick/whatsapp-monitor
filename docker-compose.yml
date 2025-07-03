@@ -108,8 +108,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_ms:/app/.wwebjs_auth/session-filial_ms:rw
-      - /tmp/chrome-filial_ms:/tmp/chrome-filial_ms:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   filial_mt:
     <<: *whatsapp-defaults
@@ -122,8 +121,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_mt:/app/.wwebjs_auth/session-filial_mt:rw
-      - /tmp/chrome-filial_mt:/tmp/chrome-filial_mt:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   filial_pr:
     <<: *whatsapp-defaults
@@ -136,9 +134,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_pr:/app/.wwebjs_auth/session-filial_pr:rw
-      - /tmp/chrome-filial_pr:/tmp/chrome-filial_pr:rw
-
+      - ./sessions/sul:/app/.wwebjs_auth:rw
+      
   filial_go:
     <<: *whatsapp-defaults
     container_name: app_filial_go
@@ -150,8 +147,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/filial_go:/app/.wwebjs_auth/session-filial_go:rw
-      - /tmp/chrome-filial_go:/tmp/chrome-filial_go:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   projetos:
     <<: *whatsapp-defaults
@@ -164,8 +160,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/projetos:/app/.wwebjs_auth/session-projetos:rw
-      - /tmp/chrome-projetos:/tmp/chrome-projetos:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   comex1:
     <<: *whatsapp-defaults
@@ -178,9 +173,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/comex1:/app/.wwebjs_auth/session-comex1:rw
-      - /tmp/chrome-comex1:/tmp/chrome-comex1:rw
-
+      - ./sessions/sul:/app/.wwebjs_auth:rw
+      
   comex2:
     <<: *whatsapp-defaults
     container_name: comex2
@@ -193,8 +187,7 @@ services:
       - api
     volumes:
       # FIXED: Was pointing to comex1 sessions - now points to comex2
-      - ./sessions/comex2:/app/.wwebjs_auth/session-comex2:rw
-      - /tmp/chrome-comex2:/tmp/chrome-comex2:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   comex3:
     <<: *whatsapp-defaults
@@ -207,9 +200,8 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/comex3:/app/.wwebjs_auth/session-comex3:rw
-      - /tmp/chrome-comex3:/tmp/chrome-comex3:rw
-
+      - ./sessions/sul:/app/.wwebjs_auth:rw
+      
   mg:
     <<: *whatsapp-defaults
     container_name: mg
@@ -221,8 +213,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/mg:/app/.wwebjs_auth/session-mg:rw
-      - /tmp/chrome-mg:/tmp/chrome-mg:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   sul:
     <<: *whatsapp-defaults
@@ -235,8 +226,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/sul:/app/.wwebjs_auth/session-sul:rw
-      - /tmp/chrome-sul:/tmp/chrome-sul:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   sudeste:
     <<: *whatsapp-defaults
@@ -249,8 +239,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste:rw
-      - /tmp/chrome-sudeste:/tmp/chrome-sudeste:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   nordeste:
     <<: *whatsapp-defaults
@@ -263,8 +252,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste:rw
-      - /tmp/chrome-nordeste:/tmp/chrome-nordeste:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   norte:
     <<: *whatsapp-defaults
@@ -277,8 +265,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/norte:/app/.wwebjs_auth/session-norte:rw
-      - /tmp/chrome-norte:/tmp/chrome-norte:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   vhf_sp:
     <<: *whatsapp-defaults
@@ -291,8 +278,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/vhf_sp:/app/.wwebjs_auth/session-vhf_sp:rw
-      - /tmp/chrome-vhf_sp:/tmp/chrome-vhf_sp:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
   vans_sp:
     <<: *whatsapp-defaults
@@ -305,8 +291,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ./sessions/vans_sp:/app/.wwebjs_auth/session-vans_sp:rw
-      - /tmp/chrome-vans_sp:/tmp/chrome-vans_sp:rw
+      - ./sessions/sul:/app/.wwebjs_auth:rw
 
 volumes:
   pgdata:
