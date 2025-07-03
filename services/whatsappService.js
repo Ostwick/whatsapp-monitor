@@ -32,6 +32,8 @@ class WhatsAppService {
     this.isProcessing = false;
     this.messageCount = 0;
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
+
+    this.cleanSessionLocks();
     
     this.initializeClient();
     this.setupEventHandlers();
