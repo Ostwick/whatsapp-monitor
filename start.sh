@@ -1,38 +1,18 @@
 #!/bin/bash
 set -e
+echo "--- WhatsApp Service Pre-flight Checks ---"
 
-# This script is run as root.
-# We fix permissions on all necessary directories before dropping privileges.
-
-# Fix 1: Ownership of the mounted session data volume
-echo "Updating ownership of /app/.wwebjs_auth..."
+echo "[1/4] Setting ownership for session data at /app/.wwebjs_auth..."
 chown -R appuser:appuser /app/.wwebjs_auth
-
-# Fix 2: Permissions of the tmpfs /tmp directory
-echo "Updating permissions of /tmp..."
+echo "[2/4] Setting permissions for /tmp..."
 chmod 1777 /tmp
-
-# Fix 3: Create and set ownership for the XDG config/cache directories
-echo "Creating and setting ownership for XDG directories..."
+echo "[3/4] Creating and setting ownership for XDG directories..."
 mkdir -p /tmp/config /tmp/cache
 chown -R appuser:appuser /tmp/config /tmp/cache
 
-# --- The rest of the script remains the same ---
+echo "[4/4] Cleaning all stale Chromium lock files..."
+find /app/.wwebjs_auth /tmp/config -type f -name "Singleton*" -print -delete || true
 
-cleanup() {
-    echo "Cleaning up stray Chrome/Chromium processes..."
-    pkill -f chromium || true
-    pkill -f chrome || true
-    exit 0
-}
+echo "--- Pre-flight checks complete. Handing over to application. ---"
 
-trap cleanup SIGTERM SIGINT
-
-echo "Initial cleanup on start..."
-pkill -f chromium || true
-pkill -f chrome || true
-
-echo "Starting WhatsApp service for ${USER_ID:-default}..."
-
-# Use 'gosu' to drop from root to the 'appuser' before executing the node process.
 exec gosu appuser node services/whatsappService.js "$@"
