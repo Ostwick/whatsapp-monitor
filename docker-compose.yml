@@ -1,166 +1,235 @@
 version: '3.9'
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: api_service
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+  
   filial_ms:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_filial_ms
     ports:
-      - "3101:3000"
     environment:
       - USER_ID=filial-ms
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-ms:/app/.wwebjs_auth/session-filial-ms
     shm_size: '1g'
+    depends_on:
+      - api
 
   filial_mt:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_filial_mt
     ports:
-      - "3102:3000"
     environment:
       - USER_ID=filial-mt
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-mt:/app/.wwebjs_auth/session-filial-mt
     shm_size: '1g'
+    depends_on:
+      - api
 
   filial_pr:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_filial_pr
     ports:
-      - "3103:3000"
     environment:
       - USER_ID=filial-pr
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-pr:/app/.wwebjs_auth/session-filial-pr
     shm_size: '1g'  
+    depends_on:
+      - api
 
   filial_go:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_filial_go
     ports:
-      - "3104:3000"
     environment:
       - USER_ID=filial-go
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/filial-go:/app/.wwebjs_auth/session-filial-go
     shm_size: '1g'
+    depends_on:
+      - api
 
   vhf_sp:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_vhf_sp
     ports:
-      - "3105:3000"
     environment:
       - USER_ID=vhf-sp
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/vhf-sp:/app/.wwebjs_auth/session-vhf-sp
     shm_size: '1g'
+    depends_on:
+      - api
 
   vans_sp:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_vans_sp
     ports:
-      - "3106:3000"
     environment:
       - USER_ID=vans-sp
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/vans-sp:/app/.wwebjs_auth/session-vans-sp
     shm_size: '1g'
+    depends_on:
+      - api
 
   sudeste:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_sudeste
     ports:
-      - "3107:3000"
     environment:
       - USER_ID=sudeste
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste
     shm_size: '1g'
+    depends_on:
+      - api
 
   sul:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_sul
     ports:
-      - "3108:3000"
     environment:
       - USER_ID=sul
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/sul:/app/.wwebjs_auth/session-sul
     shm_size: '1g'
+    depends_on:
+      - api
 
   mg:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_mg
     ports:
-      - "3109:3000"
     environment:
       - USER_ID=mg
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/mg:/app/.wwebjs_auth/session-mg
     shm_size: '1g'
+    depends_on:
+      - api
 
   norte:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_norte
     ports:
-      - "3110:3000"
     environment:
       - USER_ID=norte
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/norte:/app/.wwebjs_auth/session-norte
     shm_size: '1g'
+    depends_on:
+      - api
 
   nordeste:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_nordeste
     ports:
-      - "3111:3000"
     environment:
       - USER_ID=nordeste
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste
     shm_size: '1g'
+    depends_on:
+      - api
 
   projetos:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_projetos
     ports:
-      - "3112:3000"
     environment:
       - USER_ID=projetos
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/projetos:/app/.wwebjs_auth/session-projetos
     shm_size: '1g'
+    depends_on:
+      - api
 
   comex1:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_comex1
     ports:
-      - "3113:3000"
     environment:
       - USER_ID=comex1
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/comex1:/app/.wwebjs_auth/session-comex1
     shm_size: '1g'
+    depends_on:
+      - api
 
   comex2:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_comex2
     ports:
-      - "3114:3000"
     environment:
       - USER_ID=comex2
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/comex2:/app/.wwebjs_auth/session-comex2
     shm_size: '1g'
+    depends_on:
+      - api
 
   comex3:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.whatsapp
     container_name: app_comex3
     ports:
-      - "3115:3000"
     environment:
       - USER_ID=comex3
+      - API_ENDPOINT=http://api:3000/api/mensagens
     volumes:
       - ./sessions/comex3:/app/.wwebjs_auth/session-comex3
     shm_size: '1g'
+    depends_on:
+      - api
