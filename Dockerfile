@@ -4,7 +4,7 @@ FROM node:18-slim
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN groupadd -r appuser && useradd --no-log-init -r -g appuser -m -s /bin/false appuser
 
 WORKDIR /app
 
@@ -37,6 +37,9 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+RUN chown -R appuser:appuser /app
 
 USER appuser
 
