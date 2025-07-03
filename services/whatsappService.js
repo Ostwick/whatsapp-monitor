@@ -1,6 +1,5 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, NoAuth } = require('whatsapp-web.js');
 const { setTimeout } = require('timers/promises');
-const { execSync } = require('child_process');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
@@ -32,17 +31,7 @@ class WhatsAppService {
     this.currentBatch = [];
     this.isProcessing = false;
     this.messageCount = 0;
-    this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
-
-    try {
-      console.log(`[${this.USER_ID}] Executing pre-launch cleanup script with sudo...`);
-      // The path must match the one in the Dockerfile
-      execSync('sudo /app/clean-locks.sh', { stdio: 'inherit' });
-      console.log(`[${this.USER_ID}] Pre-launch cleanup finished.`);
-    } catch (err) {
-      console.error(`[${this.USER_ID}] CRITICAL: Failed to execute cleanup script. Exiting.`, err);
-      process.exit(1); // Exit if cleanup fails, as the browser will not launch.
-    }
+    this.sessionPath = path.join('/app/.wwebjs_auth', `session-${this.USER_ID}`);
     
     this.initializeClient();
     this.setupEventHandlers();
@@ -54,29 +43,26 @@ class WhatsAppService {
 
   initializeClient() {
     console.log(`[${this.USER_ID}] Criando client WhatsApp...`);
+
+    const userDataDir = this.sessionPath;
+    console.log(`[${this.USER_ID}] Using user data directory: ${userDataDir}`);
+    // Ensure the directory exists before puppeteer tries to use it.
+    fs.mkdirSync(userDataDir, { recursive: true });
     
     this.client = new Client({
-      authStrategy: new LocalAuth({
-        clientId: this.USER_ID,
-        dataPath: '.wwebjs_auth',
-      }),
+      authStrategy: new NoAuth(),
       puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: 'new',
         args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-gpu',
-          '--disable-dev-shm-usage',
-          '--no-first-run',
-          '--no-zygote',
-          '--single-process',
-          '--disable-extensions'
-        ]
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            `--user-data-dir=${userDataDir}`,
+            '--disable-gpu',
+            '--no-zygote',
+            '--disable-extensions'
+        ],
       },
-      takeoverOnConflict: true,
-      takeoverTimeoutMs: 30000,
-      restartOnAuthFail: true
     });
     
     console.log(`[${this.USER_ID}] Cliente criado, chamando .initialize()...`);
