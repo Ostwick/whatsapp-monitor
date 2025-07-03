@@ -2,14 +2,12 @@
   "name": "whatsapp-monitor",
   "main": "electron/main.js",
   "scripts": {
-  "start": "npx concurrently --kill-others-on-fail \"node backend/api.js\" \"node services/whatsappService.js\""
+  "start": "concurrently \"node backend/api.js\" \"node services/whatsappService.js\""
 },
   "dependencies": {
-    "concurrently": "^8.2.0",
     "dotenv": "^16.5.0",
     "electron": "^28.1.0",
     "express": "^4.18.2",
-    "express-rate-limit": "^6.7.0",
     "node-fetch": "^2.6.7",
     "pg": "^8.16.2",
     "puppeteer": "^24.10.2",
@@ -18,6 +16,7 @@
     "whatsapp-web.js": "^1.21.0"
   },
   "devDependencies": {
+    "concurrently": "^8.2.0",
     "nodemon": "^3.0.3"
   }
 }

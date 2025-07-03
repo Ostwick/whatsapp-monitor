@@ -1,28 +1,21 @@
 # Node.js
 node_modules/
 dist/
-npm-debug.log*
 
-# Ambiente e variáveis sensíveis
+# dotenv
 .env
-sessions/
 
 # Logs
 logs/
 *.log
 
-# Arquivos temporários do sistema
+# Sistema
 .DS_Store
 Thumbs.db
 
-# Configurações de IDEs/editors
+# IDEs
 .vscode/
 .idea/
 
-# Docker
-# Ignora arquivos de override ou gerados, mas mantém docker-compose.yml principal
-docker-compose.override.yml
-docker-compose.*.yml
-
-# Outros
-*.local
+# docker-compose
+.yml
