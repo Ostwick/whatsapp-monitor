@@ -34,7 +34,7 @@ class WhatsAppService {
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
     
     // Clean up any existing processes and locks before starting
-    this.cleanupBeforeStart();
+    this.cleanProfileLock(); 
     
     this.initializeClient();
     this.setupEventHandlers();
@@ -44,24 +44,28 @@ class WhatsAppService {
     this.initialize();   
   }
 
-  async cleanupBeforeStart() {
+  
+
+  cleanProfileLock() {
+    console.log(`[${this.USER_ID}] Cleaning profile lock files before launch...`);
     try {
-      // Kill any existing Chrome processes
-      const { exec } = require('child_process');
-      await new Promise((resolve) => {
-        exec('pkill -f chrome', (error) => {
-          // Ignore errors - process might not exist
-          resolve();
-        });
+      
+      const profilePath = path.join('/app/.wwebjs_auth', `session-${this.USER_ID}`, 'Default');
+      
+      const lockFiles = [
+        path.join(profilePath, 'SingletonLock'),
+        path.join(profilePath, 'SingletonSocket'),
+        path.join(profilePath, 'SingletonCookie')
+      ];
+
+      lockFiles.forEach(file => {
+        if (fs.existsSync(file)) {
+          fs.rmSync(file, { force: true });
+          console.log(`[${this.USER_ID}] Removed stale lock file: ${file}`);
+        }
       });
-      
-      // Wait a bit for processes to die
-      await setTimeout(2000);
-    
-      
-      
     } catch (err) {
-      console.error('Error during cleanup:', err);
+      console.error(`[${this.USER_ID}] Error cleaning profile lock files:`, err);
     }
   }
 
