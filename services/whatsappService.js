@@ -33,9 +33,6 @@ class WhatsAppService {
     this.messageCount = 0;
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
     
-    // Clean up any existing processes and locks before starting
-    this.cleanProfileLock(); 
-    
     this.initializeClient();
     this.setupEventHandlers();
     this.startBatchProcessor();
@@ -44,36 +41,8 @@ class WhatsAppService {
     this.initialize();   
   }
 
-  
-
-  cleanProfileLock() {
-    console.log(`[${this.USER_ID}] Cleaning profile lock files before launch...`);
-    try {
-      
-      const profilePath = path.join('/app/.wwebjs_auth', `session-${this.USER_ID}`, 'Default');
-      
-      const lockFiles = [
-        path.join(profilePath, 'SingletonLock'),
-        path.join(profilePath, 'SingletonSocket'),
-        path.join(profilePath, 'SingletonCookie')
-      ];
-
-      lockFiles.forEach(file => {
-        if (fs.existsSync(file)) {
-          fs.rmSync(file, { force: true });
-          console.log(`[${this.USER_ID}] Removed stale lock file: ${file}`);
-        }
-      });
-    } catch (err) {
-      console.error(`[${this.USER_ID}] Error cleaning profile lock files:`, err);
-    }
-  }
-
   initializeClient() {
     console.log(`[${this.USER_ID}] Criando client WhatsApp...`);
-    
-    // Generate unique user data directory
-    const timestamp = Date.now();
     
     this.client = new Client({
       authStrategy: new LocalAuth({
@@ -87,30 +56,7 @@ class WhatsAppService {
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
-          '--single-process',
-          '--no-zygote',
-          '--disable-infobars',
-          '--disable-background-networking',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-breakpad',
-          '--disable-client-side-phishing-detection',
-          '--disable-component-update',
-          '--disable-default-apps',
-          '--disable-extensions',
-          '--disable-hang-monitor',
-          '--disable-ipc-flooding-protection',
-          '--disable-popup-blocking',
-          '--disable-prompt-on-repost',
-          '--disable-renderer-backgrounding',
-          '--disable-sync',
-          '--force-color-profile=srgb',
-          '--metrics-recording-only',
-          '--no-first-run',
-          '--safebrowsing-disable-auto-update',
-          '--enable-automation',
-          '--password-store=basic',
-          '--use-mock-keychain',
+          '--unhandled-rejections=strict'
         ]
       },
       takeoverOnConflict: true,
