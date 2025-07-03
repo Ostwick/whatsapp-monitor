@@ -9,6 +9,7 @@ services:
       - USER_ID=filial-ms
     volumes:
       - ./sessions/filial-ms:/app/.wwebjs_auth/session-filial-ms
+    shm_size: '1g'
 
   filial_mt:
     build: .
@@ -19,6 +20,7 @@ services:
       - USER_ID=filial-mt
     volumes:
       - ./sessions/filial-mt:/app/.wwebjs_auth/session-filial-mt
+    shm_size: '1g'
 
   filial_pr:
     build: .
@@ -29,6 +31,7 @@ services:
       - USER_ID=filial-pr
     volumes:
       - ./sessions/filial-pr:/app/.wwebjs_auth/session-filial-pr
+    shm_size: '1g'  
 
   filial_go:
     build: .
@@ -39,6 +42,7 @@ services:
       - USER_ID=filial-go
     volumes:
       - ./sessions/filial-go:/app/.wwebjs_auth/session-filial-go
+    shm_size: '1g'
 
   vhf_sp:
     build: .
@@ -49,6 +53,7 @@ services:
       - USER_ID=vhf-sp
     volumes:
       - ./sessions/vhf-sp:/app/.wwebjs_auth/session-vhf-sp
+    shm_size: '1g'
 
   vans_sp:
     build: .
@@ -59,6 +64,7 @@ services:
       - USER_ID=vans-sp
     volumes:
       - ./sessions/vans-sp:/app/.wwebjs_auth/session-vans-sp
+    shm_size: '1g'
 
   sudeste:
     build: .
@@ -69,6 +75,7 @@ services:
       - USER_ID=sudeste
     volumes:
       - ./sessions/sudeste:/app/.wwebjs_auth/session-sudeste
+    shm_size: '1g'
 
   sul:
     build: .
@@ -79,6 +86,7 @@ services:
       - USER_ID=sul
     volumes:
       - ./sessions/sul:/app/.wwebjs_auth/session-sul
+    shm_size: '1g'
 
   mg:
     build: .
@@ -89,6 +97,7 @@ services:
       - USER_ID=mg
     volumes:
       - ./sessions/mg:/app/.wwebjs_auth/session-mg
+    shm_size: '1g'
 
   norte:
     build: .
@@ -99,6 +108,7 @@ services:
       - USER_ID=norte
     volumes:
       - ./sessions/norte:/app/.wwebjs_auth/session-norte
+    shm_size: '1g'
 
   nordeste:
     build: .
@@ -109,6 +119,7 @@ services:
       - USER_ID=nordeste
     volumes:
       - ./sessions/nordeste:/app/.wwebjs_auth/session-nordeste
+    shm_size: '1g'
 
   projetos:
     build: .
@@ -119,6 +130,7 @@ services:
       - USER_ID=projetos
     volumes:
       - ./sessions/projetos:/app/.wwebjs_auth/session-projetos
+    shm_size: '1g'
 
   comex1:
     build: .
@@ -129,6 +141,7 @@ services:
       - USER_ID=comex1
     volumes:
       - ./sessions/comex1:/app/.wwebjs_auth/session-comex1
+    shm_size: '1g'
 
   comex2:
     build: .
@@ -139,6 +152,7 @@ services:
       - USER_ID=comex2
     volumes:
       - ./sessions/comex2:/app/.wwebjs_auth/session-comex2
+    shm_size: '1g'
 
   comex3:
     build: .
@@ -149,3 +163,4 @@ services:
       - USER_ID=comex3
     volumes:
       - ./sessions/comex3:/app/.wwebjs_auth/session-comex3
+    shm_size: '1g'
