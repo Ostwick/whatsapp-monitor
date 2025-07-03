@@ -14,12 +14,12 @@ x-whatsapp-env: &whatsapp-env
   NODE_ENV:                  "production"
   NODE_OPTIONS:              "--max-old-space-size=280"
   PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium"
+  PUPPETEER_DEBUG:           "true" 
   DISABLE_GPU:               "1"
   API_ENDPOINT:              "http://api:3000/api/mensagens"
   BATCH_SIZE:                "10"
   BATCH_INTERVAL:            "5000"
   PUPPETEER_DISABLE_PROFILE_LOCK: "true"
-  # Chrome optimization flags
   CHROME_ARGS: "--no-sandbox --disable-dev-shm-usage --single-process --no-zygote --disable-gpu"
 
 x-whatsapp-defaults: &whatsapp-defaults
