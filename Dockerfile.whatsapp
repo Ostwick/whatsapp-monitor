@@ -47,7 +47,7 @@ COPY --chown=appuser:appuser package*.json ./
 
 RUN npm install
 
-COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appuser services/ ./services/
 
 USER root
 
@@ -57,4 +57,4 @@ RUN chmod +x /usr/local/bin/start.sh
 EXPOSE 3000
 
 ENTRYPOINT ["/usr/local/bin/start.sh"]
-CMD ["npm", "run", "start"]
+CMD ["node", "services/whatsappService.js"]
