@@ -8,7 +8,6 @@ WORKDIR /app
 # Install Chromium and required dependencies
 RUN apt-get update && apt-get install -y \
     gosu \
-    sudo \
     chromium \
     wget \
     ca-certificates \
@@ -57,12 +56,6 @@ COPY --chown=appuser:appuser . .
 # Copy the startup script and make it executable
 COPY --chown=appuser:appuser start.sh /app/start.sh
 RUN chmod +x /app/start.sh
-
-RUN echo '#!/bin/bash\n\
-set -e\n\
-echo "Executing privileged cleanup from Node.js..."\n\
-find /app/.wwebjs_auth /tmp/config -type f -name "Singleton*" -print -delete || true\n\
-' > /app/clean-locks.sh && chmod +x /app/clean-locks.sh
 
 RUN echo "appuser ALL=(ALL) NOPASSWD: /app/clean-locks.sh" >> /etc/sudoers
 
