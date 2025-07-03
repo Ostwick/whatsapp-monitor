@@ -11,6 +11,8 @@ echo "Creating and setting ownership for XDG directories..."
 mkdir -p /tmp/config /tmp/cache
 chown -R appuser:appuser /tmp/config /tmp/cache
 
+echo "Cleaning up stale profile lock files..."
+find /app/.wwebjs_auth -type f -name "Singleton*" -delete || true
 cleanup() {
     echo "Cleaning up stray Chrome/Chromium processes..."
     pkill -f chromium || true
