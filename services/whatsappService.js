@@ -34,7 +34,15 @@ class WhatsAppService {
     this.messageCount = 0;
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
 
-    this.cleanupBeforeStart();
+    try {
+      console.log(`[${this.USER_ID}] Executing pre-launch cleanup script with sudo...`);
+      // The path must match the one in the Dockerfile
+      execSync('sudo /app/clean-locks.sh', { stdio: 'inherit' });
+      console.log(`[${this.USER_ID}] Pre-launch cleanup finished.`);
+    } catch (err) {
+      console.error(`[${this.USER_ID}] CRITICAL: Failed to execute cleanup script. Exiting.`, err);
+      process.exit(1); // Exit if cleanup fails, as the browser will not launch.
+    }
     
     this.initializeClient();
     this.setupEventHandlers();
@@ -42,24 +50,6 @@ class WhatsAppService {
     this.startMemoryMonitor();
     
     this.initialize();   
-  }
-
-  async cleanupBeforeStart() {
-    try {
-      const { exec } = require('child_process');
-      await new Promise((resolve) => {
-        exec('pkill -f chrome', (error) => {
-          resolve();
-        });
-      });
-      
-      await setTimeout(2000);
-    
-      
-      
-    } catch (err) {
-      console.error('Error during cleanup:', err);
-    }
   }
 
   initializeClient() {
@@ -77,33 +67,11 @@ class WhatsAppService {
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-gpu',
-          '--single-process',
-          '--no-zygote',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--disable-extensions',
-          '--disable-crash-reporter',
-          '--disable-breakpad',
-          '--disable-crashpad',
-          '--disable-background-networking',
-          '--crash-dumps-dir=/tmp',
-          '--disable-background-timer-throttling',
-          '--disable-renderer-backgrounding',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-client-side-phishing-detection',
-          '--disable-sync',
-          '--disable-translate',
-          '--disable-ipc-flooding-protection',
+          '--disable-dev-shm-usage',
           '--no-first-run',
-          '--no-default-browser-check',
-          '--disable-default-apps',
-          '--disable-popup-blocking',
-          '--disable-prompt-on-repost',
-          '--disable-hang-monitor',
-          '--disable-component-update',
-          '--force-color-profile=srgb',
-          '--disable-blink-features=AutomationControlled',
-          '--disable-features=TranslateUI,BlinkGenPropertyTrees'
+          '--no-zygote',
+          '--single-process',
+          '--disable-extensions'
         ]
       },
       takeoverOnConflict: true,
@@ -286,7 +254,8 @@ class WhatsAppService {
         await this.client.destroy();
       }
       
-      await this.cleanupBeforeStart();
+      console.log(`[${this.USER_ID}] Executing pre-reconnect cleanup script with sudo...`);
+      execSync('sudo /app/clean-locks.sh', { stdio: 'inherit' });
       
       // Recreate client
       this.initializeClient();
@@ -316,7 +285,6 @@ class WhatsAppService {
       if (this.client) {
         await this.client.destroy();
       }
-      await this.cleanupBeforeStart();
     } catch (err) {
       console.error('Error during destroy:', err);
     }
