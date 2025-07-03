@@ -57,27 +57,11 @@ class WhatsAppService {
       
       // Wait a bit for processes to die
       await setTimeout(2000);
+    
       
-      // Clean session locks
-      this.cleanSessionLocks();
-      
-      // Clean Chrome user data directories
-      this.cleanChromeUserData();
       
     } catch (err) {
       console.error('Error during cleanup:', err);
-    }
-  }
-
-  cleanChromeUserData() {
-    try {
-      const chromeDataPath = `/tmp/chrome-${this.USER_ID}`;
-      if (fs.existsSync(chromeDataPath)) {
-        fs.rmSync(chromeDataPath, { recursive: true, force: true });
-        console.log(`Cleaned Chrome user data: ${chromeDataPath}`);
-      }
-    } catch (err) {
-      console.error('Error cleaning Chrome user data:', err);
     }
   }
 
@@ -86,31 +70,28 @@ class WhatsAppService {
     
     // Generate unique user data directory
     const timestamp = Date.now();
-    const chromeUserDataDir = `/tmp/chrome-${this.USER_ID}-${timestamp}`;
     
     this.client = new Client({
       authStrategy: new LocalAuth({
         clientId: this.USER_ID,
-        dataPath: this.sessionPath,
-        dataPathCache: false
+        dataPath: '.wwebjs_auth',
       }),
       puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: 'new',
         args: [
           '--no-sandbox',
+          '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
+          '--disable-gpu',
           '--single-process',
           '--no-zygote',
-          '--disable-gpu',
           '--disable-web-security',
           '--disable-features=VizDisplayCompositor',
-          `--user-data-dir=/tmp/chrome-${this.USER_ID}`,
           '--disable-extensions',
           '--disable-crash-reporter',
           '--disable-breakpad',
           '--disable-crashpad',
-          '--disable-setuid-sandbox',
           '--disable-background-networking',
           '--crash-dumps-dir=/tmp',
           '--disable-background-timer-throttling',
