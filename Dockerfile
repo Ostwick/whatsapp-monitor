@@ -4,11 +4,13 @@ FROM node:18-slim
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Define diretório de trabalho
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 WORKDIR /app
 
 # Instala dependências do sistema para Chromium
 RUN apt-get update && apt-get install -y \
+    gosu \
     chromium \
     wget \
     ca-certificates \
@@ -36,14 +38,20 @@ RUN apt-get update && apt-get install -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Copia os arquivos do projeto
-COPY . .
+USER appuser
 
-# Instala dependências do projeto
+COPY --chown=appuser:appuser package*.json ./
+
 RUN npm install
 
-# Expõe a porta usada pela API
+COPY --chown=appuser:appuser . .
+
+USER root
+
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 EXPOSE 3000
 
-# Executa a API + WhatsApp monitor
+ENTRYPOINT ["/usr/local/bin/start.sh"]
 CMD ["npm", "run", "start"]
