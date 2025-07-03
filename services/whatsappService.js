@@ -33,7 +33,7 @@ class WhatsAppService {
     this.messageCount = 0;
     this.sessionPath = path.join('.wwebjs_auth', `session-${this.USER_ID}`);
 
-    this.cleanSessionLocks();
+    this.cleanupBeforeStart();
     
     this.initializeClient();
     this.setupEventHandlers();
@@ -41,6 +41,24 @@ class WhatsAppService {
     this.startMemoryMonitor();
     
     this.initialize();   
+  }
+
+  async cleanupBeforeStart() {
+    try {
+      const { exec } = require('child_process');
+      await new Promise((resolve) => {
+        exec('pkill -f chrome', (error) => {
+          resolve();
+        });
+      });
+      
+      await setTimeout(2000);
+    
+      
+      
+    } catch (err) {
+      console.error('Error during cleanup:', err);
+    }
   }
 
   initializeClient() {
@@ -67,43 +85,6 @@ class WhatsAppService {
     });
     
     console.log(`[${this.USER_ID}] Cliente criado, chamando .initialize()...`);
-  }
-
-  cleanSessionLocks() {
-    try {
-      const locks = [
-        path.join(this.sessionPath, 'SingletonLock'),
-        path.join(this.sessionPath, '.session.lock'),
-        path.join(this.sessionPath, 'Default', 'SingletonLock'),
-        path.join(this.sessionPath, 'SingletonSocket'),
-        path.join(this.sessionPath, 'SingletonCookie')
-      ];
-      
-      locks.forEach(lockPath => {
-        if (fs.existsSync(lockPath)) {
-          try {
-            fs.unlinkSync(lockPath);
-            console.log(`Removed session lock: ${lockPath}`);
-          } catch (err) {
-            console.warn(`Could not remove lock ${lockPath}:`, err.message);
-          }
-        }
-      });
-
-      // Also try to remove the entire Default directory if it exists
-      const defaultDir = path.join(this.sessionPath, 'Default');
-      if (fs.existsSync(defaultDir)) {
-        try {
-          fs.rmSync(defaultDir, { recursive: true, force: true });
-          console.log(`Removed Default directory: ${defaultDir}`);
-        } catch (err) {
-          console.warn(`Could not remove Default directory:`, err.message);
-        }
-      }
-      
-    } catch (err) {
-      console.error('Error cleaning session locks:', err);
-    }
   }
 
   setupEventHandlers() {
