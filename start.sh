@@ -4,6 +4,10 @@ set -e
 echo "Updating ownership of /app/.wwebjs_auth to appuser..."
 chown -R appuser:appuser /app/.wwebjs_auth
 
+echo "Updating permissions of /tmp..."
+chmod 1777 /tmp
+
+
 cleanup() {
     echo "Cleaning up stray Chrome/Chromium processes..."
     pkill -f chromium || true
