@@ -52,50 +52,16 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy application code
 COPY --chown=appuser:appuser . .
 
+# Copy the startup script and make it executable
+COPY --chown=appuser:appuser start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
 # Set environment variables for Chrome
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     DISPLAY=:99 \
     CHROME_DEVEL_SANDBOX=/usr/lib/chromium/chrome-sandbox \
     PUPPETEER_DISABLE_PROFILE_LOCK=true
-
-# Create startup script to handle cleanup and initialization
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-cleanup() {\n\
-    echo "Cleaning up Chrome processes..."\n\
-    pkill -f chromium || true\n\
-    pkill -f chrome || true\n\
-    find /tmp -name "chrome-*" -type d -exec rm -rf {} + 2>/dev/null || true\n\
-    rm -rf /tmp/crashpad 2>/dev/null || true
-    exit 0\n\
-}\n\
-\n\
-# Set trap for cleanup\n\
-trap cleanup SIGTERM SIGINT\n\
-\n\
-# Clean up any existing Chrome processes and locks\n\
-echo "Initial cleanup..."\n\
-pkill -f chromium || true\n\
-pkill -f chrome || true\n\
-\n\
-# Clean Chrome temp directories (only ones we can access)\n\
-find /tmp -name "chrome-*" -type d -user appuser -exec rm -rf {} + 2>/dev/null || true\n\
-\n\
-# Clean session locks (only if we have permission)\n\
-find /app/.wwebjs_auth -name "SingletonLock" -exec rm -f {} + 2>/dev/null || true\n\
-find /app/.wwebjs_auth -name "SingletonSocket" -exec rm -f {} + 2>/dev/null || true\n\
-find /app/.wwebjs_auth -name "SingletonCookie" -exec rm -f {} + 2>/dev/null || true\n\
-find /app/.wwebjs_auth -name "Default" -type d -exec rm -rf {} + 2>/dev/null || true\n\
-\n\
-# Create temp directory for this instance\n\
-mkdir -p /tmp/chrome-${USER_ID:-default} || true\n\
-\n\
-# Start the application\n\
-echo "Starting WhatsApp service for ${USER_ID:-default}..."\n\
-exec node services/whatsappService.js "$@"\n\
-' > /app/start.sh && chmod +x /app/start.sh
 
 # Switch to non-root user
 USER appuser
