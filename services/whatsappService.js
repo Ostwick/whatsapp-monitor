@@ -1,5 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const { setTimeout } = require('timers/promises');
+const { execSync } = require('child_process');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
