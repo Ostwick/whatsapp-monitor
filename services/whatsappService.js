@@ -38,17 +38,23 @@ async function handleMessage(message, direction) {
     tipo: direction,
     data_envio: new Date().toISOString()
   };
-
-  await fetch(API_ENDPOINT, { /* ... */ });
+  
   try {
-    await fetch('http://localhost:3000/api/mensagens', {
+    // --- FIX: Use the API_ENDPOINT variable here ---
+    const response = await fetch(API_ENDPOINT, { // Use the variable
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+    
+    // It's good practice to check if the request was successful
+    if (!response.ok) {
+        throw new Error(`API returned status ${response.status}`);
+    }
+
     console.log(`[${direction}] ${nomeContato || contato}: ${message.body}`);
   } catch (err) {
-    console.error('Erro ao enviar mensagem para a API:', err);
+    console.error(`Erro ao enviar mensagem para a API (${API_ENDPOINT}):`, err.message);
   }
 }
 
