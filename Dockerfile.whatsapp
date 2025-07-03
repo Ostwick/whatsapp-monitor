@@ -7,6 +7,7 @@ WORKDIR /app
 
 # Install Chromium and required dependencies
 RUN apt-get update && apt-get install -y \
+    gosu \
     chromium \
     wget \
     ca-certificates \
@@ -62,9 +63,6 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     DISPLAY=:99 \
     CHROME_DEVEL_SANDBOX=/usr/lib/chromium/chrome-sandbox \
     PUPPETEER_DISABLE_PROFILE_LOCK=true
-
-# Switch to non-root user
-USER appuser
 
 # Health check
 HEALTHCHECK --interval=60s --timeout=10s --start-period=60s --retries=3 \
