@@ -1,5 +1,25 @@
 version: '3.9'
+x-db-env: &db-env
+  POSTGRES_USER: ${PGUSER}
+  POSTGRES_PASSWORD: ${PGPASSWORD}
+  POSTGRES_DB: ${PGDATABASE}
+  PGHOST: ${PGHOST}
+  PGPORT: ${PGPORT}
+  
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      <<: *db-env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   api:
     build:
       context: .
@@ -8,6 +28,13 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
+    environment:
+      <<: *db-env
+      TZ: ${TZ}
+      LC_ALL: ${LC_ALL}
+    depends_on:
+      postgres:
+        condition: service_healthy
   
   filial_ms:
     build: 
@@ -17,6 +44,8 @@ services:
     environment:
       - USER_ID=filial-ms
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/filial-ms:/app/.wwebjs_auth
     shm_size: '1g'
@@ -31,6 +60,8 @@ services:
     environment:
       - USER_ID=filial-mt
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/filial-mt:/app/.wwebjs_auth
     shm_size: '1g'
@@ -45,6 +76,8 @@ services:
     environment:
       - USER_ID=filial-pr
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/filial-pr:/app/.wwebjs_auth
     shm_size: '1g'  
@@ -59,6 +92,8 @@ services:
     environment:
       - USER_ID=filial-go
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/filial-go:/app/.wwebjs_auth
     shm_size: '1g'
@@ -73,6 +108,8 @@ services:
     environment:
       - USER_ID=vhf-sp
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/vhf-sp:/app/.wwebjs_auth
     shm_size: '1g'
@@ -87,6 +124,8 @@ services:
     environment:
       - USER_ID=vans-sp
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/vans-sp:/app/.wwebjs_auth
     shm_size: '1g'
@@ -101,6 +140,8 @@ services:
     environment:
       - USER_ID=sudeste
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/sudeste:/app/.wwebjs_auth
     shm_size: '1g'
@@ -115,6 +156,8 @@ services:
     environment:
       - USER_ID=sul
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/sul:/app/.wwebjs_auth
     shm_size: '1g'
@@ -129,6 +172,8 @@ services:
     environment:
       - USER_ID=mg
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/mg:/app/.wwebjs_auth
     shm_size: '1g'
@@ -143,6 +188,8 @@ services:
     environment:
       - USER_ID=norte
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/norte:/app/.wwebjs_auth
     shm_size: '1g'
@@ -157,6 +204,8 @@ services:
     environment:
       - USER_ID=nordeste
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/nordeste:/app/.wwebjs_auth
     shm_size: '1g'
@@ -171,6 +220,8 @@ services:
     environment:
       - USER_ID=projetos
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/projetos:/app/.wwebjs_auth
     shm_size: '1g'
@@ -185,6 +236,8 @@ services:
     environment:
       - USER_ID=comex1
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/comex1:/app/.wwebjs_auth
     shm_size: '1g'
@@ -199,6 +252,8 @@ services:
     environment:
       - USER_ID=comex2
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/comex2:/app/.wwebjs_auth
     shm_size: '1g'
@@ -213,8 +268,12 @@ services:
     environment:
       - USER_ID=comex3
       - API_ENDPOINT=http://api:3000/api/mensagens
+      - TZ=${TZ}
+      - LC_ALL=${LC_ALL}
     volumes:
       - ./sessions/comex3:/app/.wwebjs_auth
     shm_size: '1g'
     depends_on:
       - api
+volumes:
+  pgdata:
