@@ -1,11 +1,15 @@
 # Etapa 1: imagem base com dependências para Puppeteer/Chromium
 FROM node:18-slim
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 # Define diretório de trabalho
 WORKDIR /app
 
 # Instala dependências do sistema para Chromium
 RUN apt-get update && apt-get install -y \
+    chromium \
     wget \
     ca-certificates \
     fonts-liberation \
