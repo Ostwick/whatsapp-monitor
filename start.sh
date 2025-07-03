@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# This script is run as root.
+# We fix permissions on all necessary directories before dropping privileges.
+
 # Fix 1: Ownership of the mounted session data volume
 echo "Updating ownership of /app/.wwebjs_auth..."
 chown -R appuser:appuser /app/.wwebjs_auth
@@ -14,11 +17,22 @@ echo "Creating and setting ownership for XDG directories..."
 mkdir -p /tmp/config /tmp/cache
 chown -R appuser:appuser /tmp/config /tmp/cache
 
-# Initial process cleanup
+# --- The rest of the script remains the same ---
+
+cleanup() {
+    echo "Cleaning up stray Chrome/Chromium processes..."
+    pkill -f chromium || true
+    pkill -f chrome || true
+    exit 0
+}
+
+trap cleanup SIGTERM SIGINT
+
 echo "Initial cleanup on start..."
 pkill -f chromium || true
 pkill -f chrome || true
 
-# Use 'gosu' to drop from root to the 'appuser' before executing the node process.
 echo "Starting WhatsApp service for ${USER_ID:-default}..."
+
+# Use 'gosu' to drop from root to the 'appuser' before executing the node process.
 exec gosu appuser node services/whatsappService.js "$@"
