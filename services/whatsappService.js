@@ -1,7 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
-
+const API_ENDPOINT = process.env.API_ENDPOINT || 'http://api:3000/api/mensagens';
 const USER_ID = process.env.USER_ID || 'default'; // Nome da instância
 let vendedorId = USER_ID; // Esse valor pode ser sobrescrito após login
 
@@ -39,6 +39,7 @@ async function handleMessage(message, direction) {
     data_envio: new Date().toISOString()
   };
 
+  await fetch(API_ENDPOINT, { /* ... */ });
   try {
     await fetch('http://localhost:3000/api/mensagens', {
       method: 'POST',
