@@ -7,7 +7,8 @@ let vendedorId = USER_ID;
 
 const client = new Client({
   authStrategy: new LocalAuth({
-    dataPath: `.wwebjs_auth/session-${USER_ID}`
+    dataPath: '.wwebjs_auth', 
+    clientId: USER_ID
   }),
   puppeteer: {
     headless: true,
