@@ -12,13 +12,16 @@ const client = new Client({
   }),
   puppeteer: {
     headless: true,
-    args: ['--no-sandbox',
-    '--disable-features=TranslateUI,BlinkGenPropertyTrees',
-    '--disable-ipc-flooding-protection',
-    '--disable-renderer-backgrounding',
-    '--disable-background-timer-throttling',
-    '--disable-backgrounding-occluded-windows',
-    '--js-flags=--max-old-space-size=256']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',
+      '--disable-gpu'
+    ]
   }
 });
 
