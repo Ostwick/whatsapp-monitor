@@ -25,18 +25,11 @@ const client = new Client({
   }
 });
 
-client.on('ready', async () => {
+client.on('ready', () => {
   if (client.info?.wid?.user) {
     vendedorId = client.info.wid.user;
   }
   console.log(`WhatsApp conectado - Vendedor ID: ${vendedorId}`);
-  try {
-    console.log(`[${USER_ID}] Forcing a page reload to ensure event listeners are active...`);
-    await client.pupPage.reload();
-    console.log(`[${USER_ID}] Page reloaded successfully.`);
-  } catch (err) {
-    console.error(`[${USER_ID}] Failed to reload the page:`, err);
-  }
 });
 
 async function handleMessage(message, direction) {
@@ -55,9 +48,6 @@ async function handleMessage(message, direction) {
     tipo: direction,
     data_envio: new Date().toISOString()
   };
-  
-  // --- DEBUG LOG 1: See the data before it's sent ---
-  console.log(`[${USER_ID}] Preparing to send payload to API:`, JSON.stringify(payload, null, 2));
 
   try {
     const response = await fetch(API_ENDPOINT, {
@@ -65,21 +55,14 @@ async function handleMessage(message, direction) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    
-    // --- DEBUG LOG 2: See the API's response ---
-    const responseBody = await response.text(); // Get the raw response text
-    console.log(`[${USER_ID}] API Response Status: ${response.status}`);
-    console.log(`[${USER_ID}] API Response Body: ${responseBody}`);
 
     if (!response.ok) {
-        // The detailed response body will be included in the error
         throw new Error(`API returned status ${response.status}: ${responseBody}`);
     }
 
     console.log(`[${USER_ID}] Successfully processed message for: ${nomeContato}`);
 
   } catch (err) {
-    // This will now be a very detailed error
     console.error(`[CRITICAL] Erro ao enviar mensagem para a API (${API_ENDPOINT}):`, err);
   }
 }
