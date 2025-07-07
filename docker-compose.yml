@@ -16,6 +16,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_filial_ms
     environment:
       - USER_ID=filial-ms
@@ -31,6 +33,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_filial_mt
     environment:
       - USER_ID=filial-mt
@@ -46,6 +50,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_filial_pr
     environment:
       - USER_ID=filial-pr
@@ -61,6 +67,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_filial_go
     environment:
       - USER_ID=filial-go
@@ -76,6 +84,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_vhf_sp
     environment:
       - USER_ID=vhf-sp
@@ -91,6 +101,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_vans_sp
     environment:
       - USER_ID=vans-sp
@@ -106,6 +118,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_sudeste
     environment:
       - USER_ID=sudeste
@@ -121,6 +135,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_sul
     environment:
       - USER_ID=sul
@@ -136,6 +152,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_mg
     environment:
       - USER_ID=mg
@@ -151,6 +169,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_norte
     environment:
       - USER_ID=norte
@@ -166,6 +186,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_nordeste
     environment:
       - USER_ID=nordeste
@@ -181,6 +203,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_projetos
     environment:
       - USER_ID=projetos
@@ -196,6 +220,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_comex1
     environment:
       - USER_ID=comex1
@@ -211,6 +237,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_comex2
     environment:
       - USER_ID=comex2
@@ -226,6 +254,8 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: app_comex3
     environment:
       - USER_ID=comex3
