@@ -12,13 +12,13 @@ const client = new Client({
   }),
   puppeteer: {
     headless: true,
-    args: ['--no-sandbox'],
+    args: ['--no-sandbox',
     '--disable-features=TranslateUI,BlinkGenPropertyTrees',
     '--disable-ipc-flooding-protection',
     '--disable-renderer-backgrounding',
     '--disable-background-timer-throttling',
     '--disable-backgrounding-occluded-windows',
-    '--js-flags=--max-old-space-size=256'
+    '--js-flags=--max-old-space-size=256']
   }
 });
 
