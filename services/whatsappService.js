@@ -46,19 +46,31 @@ async function handleMessage(message, direction) {
     data_envio: new Date().toISOString()
   };
   
+  // --- DEBUG LOG 1: See the data before it's sent ---
+  console.log(`[${USER_ID}] Preparing to send payload to API:`, JSON.stringify(payload, null, 2));
+
   try {
-    
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     
+    // --- DEBUG LOG 2: See the API's response ---
+    const responseBody = await response.text(); // Get the raw response text
+    console.log(`[${USER_ID}] API Response Status: ${response.status}`);
+    console.log(`[${USER_ID}] API Response Body: ${responseBody}`);
+
     if (!response.ok) {
-        throw new Error(`API returned status ${response.status}`);
+        // The detailed response body will be included in the error
+        throw new Error(`API returned status ${response.status}: ${responseBody}`);
     }
+
+    console.log(`[${USER_ID}] Successfully processed message for: ${nomeContato}`);
+
   } catch (err) {
-    console.error(`Erro ao enviar mensagem para a API (${API_ENDPOINT}):`, err.message);
+    // This will now be a very detailed error
+    console.error(`[CRITICAL] Erro ao enviar mensagem para a API (${API_ENDPOINT}):`, err);
   }
 }
 
