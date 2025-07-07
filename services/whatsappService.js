@@ -56,8 +56,6 @@ async function handleMessage(message, direction) {
     if (!response.ok) {
         throw new Error(`API returned status ${response.status}`);
     }
-
-    console.log(`[${direction}] ${nomeContato || contato}: ${message.body}`);
   } catch (err) {
     console.error(`Erro ao enviar mensagem para a API (${API_ENDPOINT}):`, err.message);
   }
