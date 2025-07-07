@@ -22,11 +22,18 @@ const client = new Client({
   }
 });
 
-client.on('ready', () => {
+client.on('ready', async () => {
   if (client.info?.wid?.user) {
     vendedorId = client.info.wid.user;
   }
   console.log(`WhatsApp conectado - Vendedor ID: ${vendedorId}`);
+  try {
+    console.log(`[${USER_ID}] Forcing a page reload to ensure event listeners are active...`);
+    await client.pupPage.reload();
+    console.log(`[${USER_ID}] Page reloaded successfully.`);
+  } catch (err) {
+    console.error(`[${USER_ID}] Failed to reload the page:`, err);
+  }
 });
 
 async function handleMessage(message, direction) {
