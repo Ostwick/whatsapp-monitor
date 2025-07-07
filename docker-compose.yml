@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
+    mem_limit: 512m
+    mem_reservation: 256m
     container_name: api_service
     ports:
       - "3000:3000"
