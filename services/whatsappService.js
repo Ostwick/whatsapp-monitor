@@ -2,16 +2,22 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
 const API_ENDPOINT = process.env.API_ENDPOINT || 'http://api:3000/api/mensagens';
-const USER_ID = process.env.USER_ID || 'default'; // Nome da instância
-let vendedorId = USER_ID; // Esse valor pode ser sobrescrito após login
+const USER_ID = process.env.USER_ID || 'default';
+let vendedorId = USER_ID;
 
 const client = new Client({
   authStrategy: new LocalAuth({
-    dataPath: `.wwebjs_auth/session-${USER_ID}` // Sessões independentes por usuário
+    dataPath: `.wwebjs_auth/session-${USER_ID}`
   }),
   puppeteer: {
     headless: true,
-    args: ['--no-sandbox']
+    args: ['--no-sandbox'],
+    '--disable-features=TranslateUI,BlinkGenPropertyTrees',
+    '--disable-ipc-flooding-protection',
+    '--disable-renderer-backgrounding',
+    '--disable-background-timer-throttling',
+    '--disable-backgrounding-occluded-windows',
+    '--js-flags=--max-old-space-size=256'
   }
 });
 
@@ -40,14 +46,13 @@ async function handleMessage(message, direction) {
   };
   
   try {
-    // --- FIX: Use the API_ENDPOINT variable here ---
-    const response = await fetch(API_ENDPOINT, { // Use the variable
+    
+    const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     
-    // It's good practice to check if the request was successful
     if (!response.ok) {
         throw new Error(`API returned status ${response.status}`);
     }
