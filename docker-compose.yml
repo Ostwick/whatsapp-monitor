@@ -24,7 +24,7 @@ services:
     environment:
       - USER_ID=filial-ms
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/filial-ms:/app/.wwebjs_auth
     shm_size: '1g'
@@ -41,7 +41,7 @@ services:
     environment:
       - USER_ID=filial-mt
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/filial-mt:/app/.wwebjs_auth
     shm_size: '1g'
@@ -58,7 +58,7 @@ services:
     environment:
       - USER_ID=filial-pr
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/filial-pr:/app/.wwebjs_auth
     shm_size: '1g'  
@@ -75,7 +75,7 @@ services:
     environment:
       - USER_ID=filial-go
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/filial-go:/app/.wwebjs_auth
     shm_size: '1g'
@@ -92,7 +92,7 @@ services:
     environment:
       - USER_ID=vhf-sp
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/vhf-sp:/app/.wwebjs_auth
     shm_size: '1g'
@@ -109,7 +109,7 @@ services:
     environment:
       - USER_ID=vans-sp
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/vans-sp:/app/.wwebjs_auth
     shm_size: '1g'
@@ -126,7 +126,7 @@ services:
     environment:
       - USER_ID=sudeste
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/sudeste:/app/.wwebjs_auth
     shm_size: '1g'
@@ -143,7 +143,7 @@ services:
     environment:
       - USER_ID=sul
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/sul:/app/.wwebjs_auth
     shm_size: '1g'
@@ -160,7 +160,7 @@ services:
     environment:
       - USER_ID=mg
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/mg:/app/.wwebjs_auth
     shm_size: '1g'
@@ -177,7 +177,7 @@ services:
     environment:
       - USER_ID=norte
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/norte:/app/.wwebjs_auth
     shm_size: '1g'
@@ -194,7 +194,7 @@ services:
     environment:
       - USER_ID=nordeste
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/nordeste:/app/.wwebjs_auth
     shm_size: '1g'
@@ -211,7 +211,7 @@ services:
     environment:
       - USER_ID=projetos
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/projetos:/app/.wwebjs_auth
     shm_size: '1g'
@@ -228,7 +228,7 @@ services:
     environment:
       - USER_ID=comex1
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/comex1:/app/.wwebjs_auth
     shm_size: '1g'
@@ -245,7 +245,7 @@ services:
     environment:
       - USER_ID=comex2
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/comex2:/app/.wwebjs_auth
     shm_size: '1g'
@@ -262,7 +262,7 @@ services:
     environment:
       - USER_ID=comex3
       - API_ENDPOINT=http://api:3000/api/mensagens
-      
+    restart: unless-stopped
     volumes:
       - ./sessions/comex3:/app/.wwebjs_auth
     shm_size: '1g'
