@@ -3,41 +3,34 @@ const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
 const API_ENDPOINT = process.env.API_ENDPOINT || 'http://api:3000/api/mensagens';
 const USER_ID = process.env.USER_ID || 'default';
-let vendedorId = USER_ID;
 
-const client = new Client({
-  authStrategy: new LocalAuth({
-    dataPath: '.wwebjs_auth', 
-    clientId: USER_ID
-  }),
-  puppeteer: {
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
-  }
-});
+const SESSIONS = [
+    'filial-ms',
+    'filial-mt',
+    'filial-go',
+    'filial-pr',
+    'sul',
+    'sudeste',
+    'vhf-sp',
+    'vans-sp',
+    'norte',
+    'nordeste',
+    'mg',
+    'projetos',
+    'comex1',
+    'comex2',
+    'comex3'
+];
 
-client.on('ready', () => {
-  if (client.info?.wid?.user) {
-    vendedorId = client.info.wid.user;
-  }
-  console.log(`WhatsApp conectado - Vendedor ID: ${vendedorId}`);
-});
+const activeClients = new Map();
 
-async function handleMessage(message, direction) {
+async function handleMessage(message, direction, vendedorId) {
   const contato = message.fromMe ? message.to : message.from;
   const contatoInfo = await message.getContact();
   const nomeContato = contatoInfo.name || contatoInfo.pushname || contatoInfo.number;
   const isGroup = contato.endsWith('@g.us');
   const nomeGrupo = isGroup ? (await message.getChat()).name : null;
+  let vendedorId = USER_ID;
 
   const payload = {
     vendedor_id: vendedorId,
@@ -65,19 +58,72 @@ async function handleMessage(message, direction) {
   }
 }
 
-client.on('message_create', async msg => {
-  const direction = msg.fromMe ? 'sent' : 'received';
-  await handleMessage(msg, direction);
-});
+function initializeClient(USER_ID) {
+    console.log(`[${USER_ID}] Initializing client...`);
 
-client.on('qr', (qr) => {
-  console.clear();
-  console.log(`Escaneie o QR Code para conectar (${USER_ID}):`);
-  qrcode.generate(qr, { small: true });
-});
+    const client = new Client({
+        authStrategy: new LocalAuth({
+            dataPath: '.wwebjs_auth',
+            clientId: USER_ID // Crucial: Uses the specific ID for the session folder
+        }),
+        puppeteer: {
+            // Your optimized puppeteer args are still good
+            headless: true,
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--single-process',
+              '--disable-gpu'
+            ]
+          }
+    });
 
-client.on('disconnected', reason => {
-  console.log(`Sessão desconectada (${USER_ID}): ${reason}`);
-});
+    // Store the client in the map
+    activeClients.set(USER_ID, client);
 
-client.initialize();
+    // --- Event Listeners ---
+    // We must attach listeners to *this specific* client instance.
+
+    client.on('qr', (qr) => {
+        console.log(`\n\n--- QR CODE FOR: ${USER_ID} ---\n`);
+        qrcode.generate(qr, { small: true });
+        console.log(`\n--- END QR CODE FOR: ${USER_ID} ---\n\n`);
+    });
+
+    client.on('ready', () => {
+        // Determine the actual Vendedor ID from the client info if available
+        let actualVendedorId = USER_ID;
+        if (client.info?.wid?.user) {
+            actualVendedorId = client.info.wid.user;
+        }
+        console.log(`[${USER_ID}] WhatsApp conectado - Vendedor ID: ${actualVendedorId}`);
+        
+        // Update the map with the actual ID for later reference if needed
+        activeClients.set(USER_ID, { client, vendedorId: actualVendedorId });
+    });
+
+    client.on('message_create', async msg => {
+        // Retrieve the Vendedor ID when a message arrives
+        const clientData = activeClients.get(USER_ID);
+        const vendedorId = clientData.vendedorId || USER_ID;
+
+        const direction = msg.fromMe ? 'sent' : 'received';
+        await handleMessage(msg, direction, vendedorId);
+    });
+
+    client.on('disconnected', reason => {
+        console.log(`[${USER_ID}] Sessão desconectada: ${reason}`);
+    });
+
+    client.initialize();
+}
+
+// --- Main Loop ---
+console.log("Starting WhatsApp Manager...");
+SESSIONS.forEach(userId => {
+    initializeClient(userId);
+});
