@@ -60,8 +60,6 @@ async function handleMessage(message, direction) {
         throw new Error(`API returned status ${response.status}: ${responseBody}`);
     }
 
-    console.log(`[${USER_ID}] Successfully processed message for: ${nomeContato}`);
-
   } catch (err) {
     console.error(`[CRITICAL] Erro ao enviar mensagem para a API (${API_ENDPOINT}):`, err);
   }
