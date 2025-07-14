@@ -1,23 +1,30 @@
-#!/bin/bash
-set -e
+#!/bin/sh
+
+# This script runs as the 'root' user upon container startup,
+# because it's defined as the ENTRYPOINT while the user is ROOT.
 
 echo "--- Running Pre-flight Checks as root ---"
 
-# Fix 1: Ownership of the session data volume for the non-root user.
-# Adding '|| true' makes the script not fail if the path doesn't exist yet.
+# 1. Take ownership of the session data folder.
+# This ensures 'appuser' can write to the volume you mounted.
 echo "[1/3] Setting ownership of session data..."
-chown -R appuser:appuser /app/.wwebjs_auth || true
+chown -R appuser:appuser /app/.wwebjs_auth
 
-# Fix 2: Clean up stale lock files from previous crashes.
+# 2. THE SELF-HEALING FIX: Aggressively clean stale lock files.
+# This runs as root BEFORE the node app starts, so it has permissions
+# to delete any leftover lock files from previous crashed sessions.
 echo "[2/3] Cleaning stale Chromium lock files..."
-find /app/.wwebjs_auth -type f -name "Singleton*" -print -delete || true
+find /app/.wwebjs_auth -type f \( -name "SingletonLock" -o -name "SingletonSocket" \) -print -delete
 
-# Fix 3: Ensure other app files are owned by appuser.
+# 3. Ensure the main app directory is also owned by the appuser.
 echo "[3/3] Verifying app file ownership..."
-chown -R appuser:appuser /app/node_modules || true
-chown appuser:appuser /app/package-lock.json || true
+chown -R appuser:appuser /app
 
+# --- Checks are complete ---
+
+# 4. Hand over control to the non-root user.
+# 'gosu' is a lighter, more secure alternative to 'sudo'.
+# 'exec' replaces this script with the node process, making it the main process (PID 1).
+# "$@" represents the command passed from the Dockerfile's CMD line.
 echo "--- Pre-flight checks complete. Handing over to non-root user 'appuser' ---"
-
-# Drop privileges from root to 'appuser' and execute the command from the Dockerfile CMD.
 exec gosu appuser "$@"
