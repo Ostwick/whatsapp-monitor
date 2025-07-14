@@ -1,3 +1,4 @@
+process.setMaxListeners(30)
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
@@ -93,6 +94,16 @@ function initializeClient(sessionId) {
     client.initialize();
 }
 
-// --- Main Loop ---
-console.log("Starting WhatsApp Manager...");
-SESSIONS.forEach(id => initializeClient(id));
+const STAGGER_DELAY_MS = 15000; // 15 seconds
+
+const startManager = async () => {
+    console.log("Starting WhatsApp Manager with staggered client initialization...");
+    for (const sessionId of SESSIONS) {
+        initializeClient(sessionId);
+        console.log(`[MANAGER] Waiting ${STAGGER_DELAY_MS / 1000} seconds before starting next client...`);
+        await new Promise(resolve => setTimeout(resolve, STAGGER_DELAY_MS));
+    }
+    console.log("[MANAGER] All clients have been initialized.");
+};
+
+startManager();
