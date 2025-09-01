@@ -55,6 +55,7 @@ function initializeClient(sessionId) {
             clientId: sessionId 
         }),
         puppeteer: {
+            dumpio: true,
             headless: true,
             args: [
               '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage',
