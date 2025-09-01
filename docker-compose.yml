@@ -20,7 +20,6 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp 
-    user: root
     mem_limit: 12288m
     mem_reservation: 1024m
 
@@ -32,7 +31,9 @@ services:
       
     volumes:
       - ./sessions:/app/.wwebjs_auth 
-    shm_size: '2g'
+    shm_size: '4g'
+    cap_add:
+      - SYS_ADMIN
     depends_on:
       - api
     networks:
