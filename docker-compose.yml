@@ -20,6 +20,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.whatsapp 
+    user: root
     mem_limit: 12288m
     mem_reservation: 1024m
 
